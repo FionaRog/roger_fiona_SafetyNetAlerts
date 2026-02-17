@@ -1,9 +1,13 @@
 package com.openclassrooms.SafetyNetAlerts.Model;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-// mettre getter et setter
-@Data
+import java.util.List;
+
+
+@Setter
+@Getter
 public class MedicalRecord {
 
     private String firstName;
@@ -12,7 +16,7 @@ public class MedicalRecord {
 
     private String birthdate;
 
-    private String medications;
+    private List<String> medications;
 
-    private String allergies;
+    private List<String> allergies;
 }

@@ -1,10 +1,12 @@
 package com.openclassrooms.SafetyNetAlerts.Model;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 // DTO data object transfer
 public class SafetyNetData {
 

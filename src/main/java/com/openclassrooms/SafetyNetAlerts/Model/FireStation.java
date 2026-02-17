@@ -1,9 +1,11 @@
 package com.openclassrooms.SafetyNetAlerts.Model;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 
-@Data
+@Getter
+@Setter
 public class FireStation {
 
     private String address;
