@@ -5,6 +5,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 
 //@restcontroller indique que la classe réponds en json
@@ -22,7 +25,13 @@ public class CommunityEmailController {
     @GetMapping("/communityEmail")
     //@requestparam récupère le ?city=... dans l'url
     public List<String> getCommunityEmails(@RequestParam String city) {
-        //Délègue la logique au service
-        return communityEmailService.getEmailsByCity(city);
+        logger.info("communityEmail called with city={}", city);
+        List<String> emails = communityEmailService.getEmailsByCity(city);
+
+        logger.info("communityEmail success: {} emails returned", emails.size());
+        return emails;
     }
+
+    private static final Logger logger =
+            LoggerFactory.getLogger(CommunityEmailController.class);
 }

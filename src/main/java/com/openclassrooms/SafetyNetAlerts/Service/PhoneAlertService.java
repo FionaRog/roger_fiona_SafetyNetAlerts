@@ -1,6 +1,6 @@
 package com.openclassrooms.SafetyNetAlerts.Service;
 
-import com.openclassrooms.SafetyNetAlerts.Model.FireStation;
+import com.openclassrooms.SafetyNetAlerts.Model.Firestation;
 import com.openclassrooms.SafetyNetAlerts.Model.Person;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +22,7 @@ public class PhoneAlertService {
 
         Set<String> coveredAdresses = new HashSet<>();
 
-        for (FireStation fs : DataRunner.DATASOURCE.getFirestations()) {
+        for (Firestation fs : DataRunner.DATASOURCE.getFirestations()) {
             if (fs.getStation() !=null && fs.getStation().trim().equals(firestation)) {
                 if(fs.getAddress() !=null && !fs.getAddress().isBlank()) {
                     coveredAdresses.add(normalize(fs.getAddress()));

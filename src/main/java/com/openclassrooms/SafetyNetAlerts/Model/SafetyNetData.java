@@ -12,7 +12,7 @@ public class SafetyNetData {
 
     private List<Person> persons;
 
-    private List<FireStation> firestations;
+    private List<Firestation> firestations;
 
     private List<MedicalRecord> medicalrecords;
 }

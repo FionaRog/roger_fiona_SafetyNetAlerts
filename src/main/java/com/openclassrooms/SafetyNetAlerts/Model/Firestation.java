@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class FireStation {
+public class Firestation {
 
     private String address;
 
