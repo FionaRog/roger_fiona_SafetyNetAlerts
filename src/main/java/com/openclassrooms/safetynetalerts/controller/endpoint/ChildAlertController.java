@@ -28,7 +28,7 @@ public class ChildAlertController {
         logger.info("Received request GET /childAlert?address={}", address);
         List<ChildAlertDTO> childAlertByAddress = childAlertService.getChildByAddress(address);
 
-        logger.info("childAlert success : '{}' children returned", childAlertByAddress.size());
+        logger.info("ChildAlert success : '{}' children returned for address '{}'", childAlertByAddress.size(), address);
         return childAlertByAddress;
 
     }

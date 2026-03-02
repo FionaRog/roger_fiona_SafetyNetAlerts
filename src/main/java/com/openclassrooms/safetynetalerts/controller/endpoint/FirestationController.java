@@ -26,8 +26,8 @@ public class FirestationController {
         logger.info("Received request GET /firestation?stationNumber={}", stationNumber);
         FirestationResponseDTO personsByFirestation = firestationService.getPersonsByFirestation(stationNumber);
 
-        logger.info("firestation success : {} persons returned, including {} children and {} adults",
-                personsByFirestation.getPeople().size() , personsByFirestation.getChildren(), personsByFirestation.getAdults());
+        logger.info("Firestation success : {} persons returned for station '{}', including {} children and {} adults",
+                personsByFirestation.getPeople().size(), stationNumber, personsByFirestation.getChildren(), personsByFirestation.getAdults());
         return personsByFirestation;
     }
 

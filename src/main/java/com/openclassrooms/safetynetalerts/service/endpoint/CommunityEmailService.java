@@ -17,7 +17,9 @@ public class CommunityEmailService implements ICommunityEmailService{
     private static final Logger logger = LoggerFactory.getLogger(CommunityEmailService.class);
 
     public List<String> getEmailsByCity(String city) {
-            if (city == null || city.isBlank()) {
+        logger.debug("CommunityEmail request: city='{}'", city);
+
+        if (city == null || city.isBlank()) {
                 logger.debug("CommunityEmail rejected: city is null/blank");
                 return List.of();
         }

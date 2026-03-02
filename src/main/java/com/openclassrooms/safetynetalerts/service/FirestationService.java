@@ -119,26 +119,18 @@ public class FirestationService implements IFirestationService{
 
 // ------------------- ENDPOINT ---------------------
     public FirestationResponseDTO getPersonsByFirestation (String stationNumber) {
+        logger.debug("Firestation request: station='{}'", stationNumber);
 
         if (stationNumber == null || stationNumber.isBlank()) {
-           return emptyResponse();
+           return new FirestationResponseDTO();
         }
 
         // Construction de la liste des adresses couvertes par la station
-        Set<String> coveredAddresses = new HashSet<>();
-
-        for(Firestation fs : DataLoader.DATASOURCE.getFirestations()) {
-            if(fs.getStation() !=null && normalize(fs.getStation()).equals(normalize(stationNumber))) {
-                if(fs.getAddress() !=null && !fs.getAddress().isBlank()) {
-                    coveredAddresses.add(normalize(fs.getAddress()));
-                }
-            }
-        }
-
+        Set<String> coveredAddresses = finCoveredAddress(stationNumber);
         logger.debug("Found {} covered addresses for station {}", coveredAddresses.size(), stationNumber);
 
         if( coveredAddresses.isEmpty()) {
-            return emptyResponse();
+            return new FirestationResponseDTO();
         }
 
         // Créer un médical record pour les personnes
@@ -147,40 +139,34 @@ public class FirestationService implements IFirestationService{
 
         // Initialiser la liste de réponse (people, adults, children)
         List<FirestationPersonDTO> people = new ArrayList<>();
-        int adults = 0;
-        int children = 0;
 
         //Ajout des personnes à la liste si correspondance avec adresse couverte
-        for(Person person : DataLoader.DATASOURCE.getPersons()) {
-            if(person.getAddress() == null) continue;
-
-            String personAddress = normalize(person.getAddress());
-            if(!coveredAddresses.contains(personAddress)) continue;
-
-            // Mapping
-            FirestationPersonDTO dto =
-                    firestationMapper.toFirestationPersonDTO(person);
-            people.add(dto);
-
-            // Calcul de l'âge et classification des personnes
-            Integer age = resolveAge(person, medicalIndex);
-            if(age != null && age <= 18) {
-                children ++;
-            } else {
-                adults ++;
-            }
-        }
+        int[] counts = new int[2];
+        fillPeopleAndCount(coveredAddresses, medicalIndex, people, counts);
 
         // Construction de la réponse
         FirestationResponseDTO response = new FirestationResponseDTO();
         response.setPeople(people);
-        response.setAdults(adults);
-        response.setChildren(children);
+        response.setAdults(counts[0]);
+        response.setChildren(counts[1]);
 
         return response;
     }
 
+
 // ------------------ HELPERS -------------------
+    private Set<String> finCoveredAddress(String stationNumber) {
+         Set<String> coveredAddresses = new HashSet<>();
+
+            for(Firestation fs : DataLoader.DATASOURCE.getFirestations()) {
+                if(fs.getStation() !=null && normalize(fs.getStation()).equals(normalize(stationNumber))) {
+                    if(fs.getAddress() !=null && !fs.getAddress().isBlank()) {
+                    coveredAddresses.add(normalize(fs.getAddress()));
+            }
+        }
+    }
+    return coveredAddresses;
+}
 
     private Map<String, MedicalRecord> buildMedicalIndex() {
 
@@ -191,6 +177,24 @@ public class FirestationService implements IFirestationService{
             medicalIndex.put(key, mr);
         }
         return medicalIndex;
+    }
+
+    private void fillPeopleAndCount( Set<String> coveredAddresses, Map<String, MedicalRecord> medicalIndex,
+                                     List<FirestationPersonDTO> people, int[] counts) {
+        for(Person person : DataLoader.DATASOURCE.getPersons()) {
+            if(person.getAddress() == null) continue;
+
+            String personAddress = normalize(person.getAddress());
+            if(!coveredAddresses.contains(personAddress)) continue;
+
+            FirestationPersonDTO dto = firestationMapper.toFirestationPersonDTO(person);
+            people.add(dto);
+
+            Integer age = resolveAge(person, medicalIndex);
+            if(age != null && age <= 18) {
+                counts[1] ++;
+            } else counts [0]++;
+        }
     }
 
     private Integer resolveAge(Person person, Map<String, MedicalRecord> medicalIndex) {
@@ -219,12 +223,4 @@ public class FirestationService implements IFirestationService{
         return normalize(firstName) + "|" + normalize(lastName);
     }
 
-
-    private FirestationResponseDTO emptyResponse() {
-        FirestationResponseDTO dto = new FirestationResponseDTO();
-        dto.setPeople(List.of());
-        dto.setAdults(0);
-        dto.setChildren(0);
-        return dto;
-    }
 }

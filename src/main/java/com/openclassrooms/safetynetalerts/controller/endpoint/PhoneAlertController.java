@@ -27,7 +27,7 @@ public class PhoneAlertController {
         logger.info("Received request GET /phoneAlert?firestation={}",firestation);
         List<String> phoneByFirestation = phoneAlertService.getPhoneByFirestation(firestation);
 
-        logger.info("phoneAlert success: {} phone numbers returned",phoneByFirestation.size());
+        logger.info("PhoneAlert success: {} phone numbers returned for station '{}'",phoneByFirestation.size(), firestation);
         return phoneByFirestation;
     }
 

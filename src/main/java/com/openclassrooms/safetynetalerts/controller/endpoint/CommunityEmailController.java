@@ -28,7 +28,7 @@ public class CommunityEmailController {
         logger.info("Received request GET /communityEmail?city={}", city);
         List<String> emails = communityEmailService.getEmailsByCity(city);
 
-        logger.info("communityEmail success: {} emails returned", emails.size());
+        logger.info("communityEmail success: {} emails returned for city '{}'", emails.size(), city);
         return emails;
     }
 

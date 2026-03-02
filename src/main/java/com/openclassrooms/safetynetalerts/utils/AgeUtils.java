@@ -23,7 +23,7 @@ public final class AgeUtils {
             LocalDate birthFormatted = LocalDate.parse(birthDate, FORMATTER);
             return Period.between(birthFormatted, LocalDate.now()).getYears();
         } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("Invalid birthdate format (expectedMM/dd/yyyy):" + birthDate, e);
+            throw new IllegalArgumentException("Invalid birthdate format (expected MM/dd/yyyy):" + birthDate, e);
         }
     }
 }

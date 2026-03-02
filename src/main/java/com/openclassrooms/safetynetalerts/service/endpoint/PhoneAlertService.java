@@ -20,29 +20,43 @@ public class PhoneAlertService implements IPhoneAlertService {
 
 
     public List<String> getPhoneByFirestation(String firestation) {
+        logger.debug("PhoneAlert request: firestation='{}'", firestation);
 
         if (firestation == null || firestation.isBlank()) {
             logger.debug("PhoneAlert rejected: firestation is null/blank");
             return List.of();
         }
 
-        Set<String> coveredAdresses = new HashSet<>();
-
-        for (Firestation fs : DataLoader.DATASOURCE.getFirestations()) {
-            if (fs.getStation() !=null && fs.getStation().trim().equals(firestation)) {
-                if(fs.getAddress() !=null && !fs.getAddress().isBlank()) {
-                    coveredAdresses.add(normalize(fs.getAddress()));
-                }
-            }
-        }
-        logger.debug("PhoneAlert: {} addresses covered found",
-                coveredAdresses.size());
+        Set<String> coveredAdresses = findCoveredAddressesByStation(firestation);
+        logger.debug("PhoneAlert: {} addresses covered found for station '{}'",
+                coveredAdresses.size(), firestation);
 
         if (coveredAdresses.isEmpty()) {
             logger.debug("PhoneAlert: no addresses found");
             return List.of();
         }
 
+        Set<String> uniquePhones = collectPhonesByAddress(coveredAdresses);
+        logger.debug("PhoneAlert: {} phone numbers collected for station '{}'", uniquePhones.size(), firestation);
+        return new ArrayList<>(uniquePhones);
+    }
+
+
+    // ----------------------- HELPERS ---------------------------------
+    private Set<String> findCoveredAddressesByStation(String firestation) {
+        Set<String> coveredAdresses = new HashSet<>();
+
+        for (Firestation fs : DataLoader.DATASOURCE.getFirestations()) {
+            if (fs.getStation() !=null && normalize(fs.getStation()).equals(normalize(firestation))) {
+                if(fs.getAddress() !=null && !fs.getAddress().isBlank()) {
+                    coveredAdresses.add(normalize(fs.getAddress()));
+                }
+            }
+        }
+        return coveredAdresses;
+    }
+
+    private Set<String> collectPhonesByAddress(Set<String> coveredAdresses) {
         Set<String> uniquePhones = new HashSet<>();
 
         for(Person person : DataLoader.DATASOURCE.getPersons()) {
@@ -55,9 +69,9 @@ public class PhoneAlertService implements IPhoneAlertService {
                 }
             }
         }
-        logger.debug("PhoneAlert: {} phone numbers collected", uniquePhones.size());
-        return new ArrayList<>(uniquePhones);
+        return uniquePhones;
     }
+
     private String normalize(String value) {
         return value.trim().toLowerCase();
     }

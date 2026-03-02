@@ -30,6 +30,8 @@ public class ChildAlertService implements IChildAlertService{
 
 
      public List<ChildAlertDTO> getChildByAddress (String address) {
+         logger.debug("ChildAlert request: address='{}'", address);
+
         if(address == null || address.isBlank()) {
             logger.debug("ChildAlert rejected: address is null/blank");
             return List.of();
@@ -39,13 +41,7 @@ public class ChildAlertService implements IChildAlertService{
 
         Map<String, MedicalRecord> medicalIndex = buildMedicalIndex();
 
-        List<Person> household = new ArrayList<>();
-        for (Person p : DataLoader.DATASOURCE.getPersons()) {
-            if(p.getAddress() == null) continue;
-            if(normalize(p.getAddress()).equals(targetAddress)) {
-                household.add(p);
-            }
-        }
+         List<Person> household = findHouseholdByAddress(targetAddress);
          logger.debug("ChildAlert: household size for address '{}' = {}",
                  targetAddress, household.size());
 
@@ -59,27 +55,20 @@ public class ChildAlertService implements IChildAlertService{
 
         for (Person p : household) {
             MedicalRecord mr = medicalIndex.get(personKey(p.getFirstName(),p.getLastName()));
-            if(mr == null || mr.getBirthdate() == null || mr.getBirthdate().isBlank()) {
-                logger.debug("No birthdate for {} {}", p.getFirstName(), p.getLastName());
-                continue;
-            }
 
-            try {
-                int age = AgeUtils.calculateAge(mr.getBirthdate());
+            Integer age = resolveAge(p, mr);
+            if (age == null) continue;
 
-                if(age<=18) {
-                    ChildAlertDTO child = personMapper.toChildAlertDto(p);
-                    child.setAge(age);
-                    children.add(child);
-                } else {
-                    AdultDTO adult = personMapper.toAdultDto(p);
-                    adults.add(personMapper.toAdultDto(p));
-                }
-            } catch (IllegalArgumentException e) {
-                logger.error("Invalid birthdate '{}' for {} {}", mr.getBirthdate(),
-                        p.getFirstName(), p.getLastName(), e);
+            if (age <= 18) {
+                ChildAlertDTO child = personMapper.toChildAlertDto(p);
+                child.setAge(age);
+                children.add(child);
+            } else {
+                AdultDTO adult = personMapper.toAdultDto(p);
+                adults.add(adult);
             }
         }
+
          logger.debug("ChildAlert: {} children and {} adults found for address '{}'",
                  children.size(), adults.size(), targetAddress);
 
@@ -95,7 +84,7 @@ public class ChildAlertService implements IChildAlertService{
         return children;
     }
 
-// ----------------- HELPERS ----------------------------
+// --------------------- HELPERS -------------------------------
     private String normalize(String value) {
         return value.trim().toLowerCase();
     }
@@ -119,5 +108,29 @@ public class ChildAlertService implements IChildAlertService{
         return index;
     }
 
+    private List<Person> findHouseholdByAddress(String targetAddress) {
+        List<Person> household = new ArrayList<>();
 
+        for (Person p : DataLoader.DATASOURCE.getPersons()) {
+            if(p.getAddress() == null) continue;
+            if(normalize(p.getAddress()).equals(targetAddress)) {
+                household.add(p);
+            }
+        }
+        return household;
+    }
+
+    private Integer resolveAge(Person p, MedicalRecord mr) {
+        if (mr == null || mr.getBirthdate() == null || mr.getBirthdate().isBlank()) {
+            logger.debug("ChildAlert : no birthdate for {} {}", p.getFirstName(), p.getLastName());
+            return null;
+        }
+        try {
+            return AgeUtils.calculateAge(mr.getBirthdate());
+        } catch (IllegalArgumentException e) {
+            logger.error("ChildAlert: invalid birthdate '{}' for {} {}",
+                    mr.getBirthdate(), p.getFirstName(), p.getLastName(), e);
+            return null;
+        }
+    }
 }
