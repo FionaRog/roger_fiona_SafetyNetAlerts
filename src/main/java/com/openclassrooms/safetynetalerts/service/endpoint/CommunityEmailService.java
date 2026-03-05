@@ -11,11 +11,37 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Implémentation du service permettant de récupérer les adresses e-mail
+ * des habitants d'une ville donnée.
+ *
+ * <p>Fonctionnement :</p>
+ * <ul>
+ *   <li>valide le paramètre d'entrée (null ou blanc → liste vide),</li>
+ *   <li>parcourt les personnes chargées via {@link DataLoader},</li>
+ *   <li>filtre celles dont la ville correspond (equalsIgnoreCase),</li>
+ *   <li>retourne les adresses e-mail uniques.</li>
+ * </ul>
+ *
+ *
+ * <p>Les e-mails null ou blancs sont ignorés.</p>
+ *
+ * @since 1.0
+ */
 @Service
 public class CommunityEmailService implements ICommunityEmailService{
 
     private static final Logger logger = LoggerFactory.getLogger(CommunityEmailService.class);
 
+    /**
+     * Retourne la liste des adresses e-mail uniques pour la ville fournie.
+     *
+     * <p>La comparaison de la ville est insensible à la casse.</p>
+     *
+     * @param city nom de la ville recherchée
+     * @return liste d'e-mails uniques, ou liste vide si aucun résultat
+     * @since 1.0
+     */
     public List<String> getEmailsByCity(String city) {
         logger.debug("CommunityEmail request: city='{}'", city);
 

@@ -14,6 +14,26 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+/**
+ * Implémentation du service de gestion des casernes (firestations).
+ *
+ * <p>Cette classe combine :</p>
+ * <ul>
+ *   <li>des opérations CRUD sur les mappings adresse ↔ station,</li>
+ *   <li>la logique métier de l'endpoint {@code /firestation?stationNumber=...}.</li>
+ * </ul>
+ *
+ *
+ * <p>Règles principales pour l'endpoint :</p>
+ * <ul>
+ *   <li>une station couvre un ensemble d'adresses,</li>
+ *   <li>les personnes vivant à ces adresses sont incluses dans la réponse,</li>
+ *   <li>le calcul enfant/adulte repose sur l'âge (enfant {@code <= 18}), si l'âge est calculable.</li>
+ * </ul>
+ *
+ *
+ * @since 1.0
+ */
 @Service
 public class FirestationService implements IFirestationService{
 
@@ -21,16 +41,35 @@ public class FirestationService implements IFirestationService{
 
     private final FirestationMapper firestationMapper;
 
+    /**
+     * Construit le service Firestation.
+     *
+     * @param firestationMapper mapper MapStruct utilisé pour construire les DTO
+     * @since 1.0
+     */
     public FirestationService(FirestationMapper firestationMapper) {
         this.firestationMapper = firestationMapper;
     }
 
 // --------------- CRUD ----------------------
+    /**
+     * Retourne la liste des mappings adresse ↔ station.
+     *
+     * @return liste des {@link Firestation} (copie)
+     * @since 1.0
+     */
     public List<Firestation> getFirestation() {
 
         return new ArrayList<>(DataLoader.DATASOURCE.getFirestations());
     }
 
+    /**
+     * Ajoute un mapping adresse ↔ station.
+     *
+     * @param newfirestation mapping à ajouter
+     * @return {@code true} si ajouté, {@code false} si paramètres invalides ou duplicat d'adresse
+     * @since 1.0
+     */
     public boolean addFirestation(Firestation newfirestation) {
 
         if (newfirestation == null || newfirestation.getAddress() == null || newfirestation.getAddress().isBlank()) return false;
@@ -49,6 +88,13 @@ public class FirestationService implements IFirestationService{
         return true;
     }
 
+    /**
+     * Met à jour la station associée à une adresse.
+     *
+     * @param updatedFirestation mapping avec adresse cible et nouvelle station
+     * @return {@code true} si mis à jour, {@code false} si paramètres invalides ou adresse introuvable
+     * @since 1.0
+     */
     public boolean updateFirestationByAddress(Firestation updatedFirestation) {
 
         if (updatedFirestation == null || updatedFirestation.getAddress() == null || updatedFirestation.getAddress().isBlank()) return false;
@@ -68,6 +114,13 @@ public class FirestationService implements IFirestationService{
         return false;
     }
 
+    /**
+     * Supprime le mapping correspondant à l'adresse fournie.
+     *
+     * @param deletedAddress adresse à supprimer
+     * @return {@code true} si suppression effectuée, {@code false} sinon
+     * @since 1.0
+     */
     public boolean deleteFirestationByAddress(String deletedAddress) {
 
         if(deletedAddress == null || deletedAddress.isBlank()) {
@@ -92,6 +145,13 @@ public class FirestationService implements IFirestationService{
         return deleted;
     }
 
+    /**
+     * Supprime tous les mappings correspondant à la station fournie.
+     *
+     * @param deletedStation station à supprimer
+     * @return {@code true} si suppression effectuée, {@code false} sinon
+     * @since 1.0
+     */
     public boolean deleteFirestationByStation(String deletedStation) {
 
         if(deletedStation == null || deletedStation.isBlank()) {
@@ -118,6 +178,18 @@ public class FirestationService implements IFirestationService{
     }
 
 // ------------------- ENDPOINT ---------------------
+    /**
+     * Retourne les personnes couvertes par la station fournie ainsi que le nombre d'adultes et d'enfants.
+     *
+     * <p>Si {@code stationNumber} est null/blanc, si aucune adresse n'est couverte,
+     * ou si aucune donnée exploitable n'est trouvée, un {@link FirestationResponseDTO} vide est retourné.</p>
+     *
+     * <p>Un enfant est défini comme ayant un âge {@code <= 18}.</p>
+     *
+     * @param stationNumber numéro de station
+     * @return {@link FirestationResponseDTO} contenant la liste des personnes et les compteurs adultes/enfants
+     * @since 1.0
+     */
     public FirestationResponseDTO getPersonsByFirestation (String stationNumber) {
         logger.debug("Firestation request: station='{}'", stationNumber);
 
@@ -126,7 +198,7 @@ public class FirestationService implements IFirestationService{
         }
 
         // Construction de la liste des adresses couvertes par la station
-        Set<String> coveredAddresses = finCoveredAddress(stationNumber);
+        Set<String> coveredAddresses = finCoveredAddresses(stationNumber);
         logger.debug("Found {} covered addresses for station {}", coveredAddresses.size(), stationNumber);
 
         if( coveredAddresses.isEmpty()) {
@@ -155,7 +227,18 @@ public class FirestationService implements IFirestationService{
 
 
 // ------------------ HELPERS -------------------
-    private Set<String> finCoveredAddress(String stationNumber) {
+    /**
+     * Construit l'ensemble des adresses couvertes par la station fournie.
+     *
+     * <p>La comparaison du numéro de station est insensible à la casse.</p>
+     *
+     * <p>Les adresses null ou blanches sont ignorées.
+     * Les adresses retournées sont normalisées (trim + lowercase).</p>
+     *
+     * @param stationNumber numéro de station recherché
+     * @return ensemble des adresses couvertes (jamais {@code null})
+     */
+    private Set<String> finCoveredAddresses(String stationNumber) {
          Set<String> coveredAddresses = new HashSet<>();
 
             for(Firestation fs : DataLoader.DATASOURCE.getFirestations()) {
@@ -168,6 +251,17 @@ public class FirestationService implements IFirestationService{
     return coveredAddresses;
 }
 
+    /**
+     * Construit un index des dossiers médicaux basé sur la clé
+     * "prenom|nom" normalisée.
+     *
+     * <p>Cet index permet un accès rapide au {@link MedicalRecord}
+     * correspondant à une {@link Person}.</p>
+     *
+     * <p>En cas de doublon de clé, le dernier dossier rencontré écrase le précédent.</p>
+     *
+     * @return map associant une clé normalisée à un {@link MedicalRecord}
+     */
     private Map<String, MedicalRecord> buildMedicalIndex() {
 
         Map<String, MedicalRecord> medicalIndex = new HashMap<>();
@@ -179,6 +273,25 @@ public class FirestationService implements IFirestationService{
         return medicalIndex;
     }
 
+    /**
+     * Remplit la liste des personnes couvertes par les adresses fournies
+     * et met à jour les compteurs adultes/enfants.
+     *
+     * <p>Pour chaque personne vivant à une adresse couverte :</p>
+     * <ul>
+     *   <li>un {@link FirestationPersonDTO} est ajouté à la liste {@code people},</li>
+     *   <li>le compteur enfant est incrémenté si l'âge est {@code <= 18},</li>
+     *   <li>sinon le compteur adulte est incrémenté.</li>
+     * </ul>
+     *
+     *
+     * <p>Les personnes sans âge calculable sont comptabilisées comme adultes.</p>
+     *
+     * @param coveredAddresses ensemble des adresses couvertes
+     * @param medicalIndex index des dossiers médicaux
+     * @param people liste des DTO à remplir
+     * @param counts tableau de taille 2 : index 0 = adultes, index 1 = enfants
+     */
     private void fillPeopleAndCount( Set<String> coveredAddresses, Map<String, MedicalRecord> medicalIndex,
                                      List<FirestationPersonDTO> people, int[] counts) {
         for(Person person : DataLoader.DATASOURCE.getPersons()) {
@@ -197,6 +310,16 @@ public class FirestationService implements IFirestationService{
         }
     }
 
+    /**
+     * Résout l'âge d'une personne à partir de l'index médical.
+     *
+     * <p>Retourne {@code null} si aucun dossier médical n'est trouvé
+     * ou si la date de naissance est absente/invalide.</p>
+     *
+     * @param person personne concernée
+     * @param medicalIndex index des dossiers médicaux
+     * @return âge en années, ou {@code null} si non calculable
+     */
     private Integer resolveAge(Person person, Map<String, MedicalRecord> medicalIndex) {
         String key = personKey(person.getFirstName(),person.getLastName());
         MedicalRecord mr = medicalIndex.get(key);
@@ -215,10 +338,29 @@ public class FirestationService implements IFirestationService{
         }
     }
 
+    /**
+     * Normalise une chaîne de caractères pour comparaison.
+     *
+     * <p>Transformation appliquée : {@code trim()} puis {@code toLowerCase()}.
+     * Si la valeur est {@code null}, retourne une chaîne vide.</p>
+     *
+     * @param value valeur à normaliser
+     * @return valeur normalisée (jamais {@code null})
+     */
     private String normalize(String value) {
         return value == null ? "" : value.trim().toLowerCase();
     }
 
+    /**
+     * Construit une clé d'identification unique basée sur le prénom et le nom.
+     *
+     * <p>Les deux valeurs sont normalisées puis concaténées
+     * sous la forme {@code prenom|nom}.</p>
+     *
+     * @param firstName prénom (peut être null)
+     * @param lastName nom (peut être null)
+     * @return clé normalisée utilisée pour l'index médical
+     */
     private String personKey(String firstName, String lastName) {
         return normalize(firstName) + "|" + normalize(lastName);
     }

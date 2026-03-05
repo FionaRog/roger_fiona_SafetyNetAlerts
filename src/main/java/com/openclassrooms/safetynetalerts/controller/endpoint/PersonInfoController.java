@@ -10,6 +10,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * Contrôleur REST exposant l'endpoint permettant de récupérer les informations
+ * détaillées des personnes correspondant à un nom de famille.
+ *
+ * <p>Responsabilité :
+ * recevoir la requête HTTP, déléguer la logique métier au service
+ * {@link IPersonInfoService}, puis retourner le résultat au format JSON.</p>
+ *
+ * <p>Endpoint exposé : {@code GET /personInfo?lastName=...}</p>
+ *
+ * <p>Code HTTP retourné : {@code 200 OK} (liste vide si aucun résultat).</p>
+ *
+ * @since 1.0
+ */
 @RestController
 public class PersonInfoController {
 
@@ -17,10 +31,23 @@ public class PersonInfoController {
 
     private final IPersonInfoService personInfoService;
 
+    /**
+     * Construit le contrôleur PersonInfo.
+     *
+     * @param personInfoService service métier associé
+     * @since 1.0
+     */
     public PersonInfoController(IPersonInfoService personInfoService) {
         this.personInfoService = personInfoService;
     }
 
+    /**
+     * Endpoint permettant de retourner les informations des personnes correspondant au nom fourni.
+     *
+     * @param lastName nom de famille recherché (paramètre obligatoire)
+     * @return liste de {@link PersonInfoDTO} (peut être vide)
+     * @since 1.0
+     */
     @GetMapping("/personInfo")
     public List<PersonInfoDTO> getPersonInfoByLastName (@RequestParam("lastName") String lastName) {
         logger.info("Received request GET /personInfo?lastName={}", lastName);

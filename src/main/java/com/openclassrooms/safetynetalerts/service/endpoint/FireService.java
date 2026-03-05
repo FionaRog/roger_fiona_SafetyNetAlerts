@@ -15,6 +15,30 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Implémentation du service métier associé à l'endpoint {@code /fire}.
+ *
+ * <p>Fonctionnement :</p>
+ * <ul>
+ *   <li>valide l'adresse (null/blanche → DTO vide),</li>
+ *   <li>recherche la station associée à l'adresse,</li>
+ *   <li>recherche les personnes vivant à l'adresse,</li>
+ *   <li>construit une liste de {@link FirePersonDTO} en s'appuyant sur {@link FireMapper}
+ *       et sur les dossiers médicaux si disponibles.</li>
+ * </ul>
+ *
+ *
+ * <p>Comportements importants :</p>
+ * <ul>
+ *   <li>si aucune station n'est trouvée pour l'adresse : retourne un {@link FireResponseDTO} vide,</li>
+ *   <li>si la station existe mais qu'aucune personne n'est trouvée :
+ *       retourne un DTO avec la station renseignée et une liste vide,</li>
+ *   <li>si la date de naissance est absente/invalide, l'âge est renseigné à {@code 0}.</li>
+ * </ul>
+ *
+ *
+ * @since 1.0
+ */
 @Service
 public class FireService implements IFireService {
 
@@ -22,11 +46,23 @@ public class FireService implements IFireService {
 
     private static final Logger logger = LoggerFactory.getLogger(FireService.class);
 
+    /**
+     * Construit le service Fire.
+     *
+     * @param fireMapper mapper MapStruct utilisé pour construire les DTO
+     * @since 1.0
+     */
     public FireService (FireMapper fireMapper) {
         this.fireMapper = fireMapper;
     }
 
-
+    /**
+     * Retourne la station et les informations des personnes vivant à l'adresse fournie.
+     *
+     * @param address adresse recherchée (peut être null ou blanche)
+     * @return {@link FireResponseDTO} contenant la station et la liste des {@link FirePersonDTO}
+     * @since 1.0
+     */
     public FireResponseDTO getPersonByAddress(String address) {
         logger.debug("Fire request: address='{}'", address);
 
@@ -67,7 +103,14 @@ public class FireService implements IFireService {
 
 
 // ----------------------- HELPERS -------------------------------
-
+    /**
+     * Recherche le numéro de station couvrant l'adresse donnée.
+     *
+     * <p>La comparaison d'adresse est insensible à la casse.</p>
+     *
+     * @param address adresse recherchée
+     * @return numéro de station, ou {@code null} si aucune correspondance
+     */
     private String findStationByAddress(String address) {
         for (Firestation fs: DataLoader.DATASOURCE.getFirestations()) {
             if(fs == null || fs.getAddress() == null) continue;
@@ -79,6 +122,17 @@ public class FireService implements IFireService {
         return null;
     }
 
+    /**
+     * Recherche les personnes vivant à l'adresse donnée.
+     *
+     * <p>La comparaison est insensible à la casse.</p>
+     *
+     * <p>Les entrées null sont ignorées. La liste retournée
+     * n'est jamais {@code null}.</p>
+     *
+     * @param address adresse recherchée
+     * @return liste des personnes trouvées (peut être vide)
+     */
     private List<Person> findPersonsByAddress(String address) {
         List<Person> result = new ArrayList<>();
 
@@ -92,6 +146,15 @@ public class FireService implements IFireService {
         return result;
     }
 
+    /**
+     * Construit la liste des {@link FirePersonDTO} à partir des personnes présentes à l'adresse.
+     *
+     * <p>Pour chaque personne, tente de récupérer le {@link MedicalRecord} associé et d'en déduire l'âge.
+     * En cas de date invalide, l'âge est fixé à {@code 0}.</p>
+     *
+     * @param personsAtAddress personnes vivant à l'adresse
+     * @return liste des DTO construits (jamais null)
+     */
     private List<FirePersonDTO> buildFirePersonDtos(List<Person> personsAtAddress) {
         List<FirePersonDTO> dtos = new ArrayList<>();
 
@@ -117,6 +180,18 @@ public class FireService implements IFireService {
         return dtos;
     }
 
+    /**
+     * Recherche le dossier médical correspondant au prénom et nom fournis.
+     *
+     * <p>La comparaison est insensible à la casse.</p>
+     *
+     * <p>Retourne {@code null} si aucun dossier n'est trouvé
+     * ou si les paramètres sont null.</p>
+     *
+     * @param firstName prénom recherché
+     * @param lastName nom recherché
+     * @return {@link MedicalRecord} correspondant, ou {@code null} si absent
+     */
     private MedicalRecord findMedicalRecordByName(String firstName, String lastName) {
         if (firstName == null || lastName == null) {
             return  null;

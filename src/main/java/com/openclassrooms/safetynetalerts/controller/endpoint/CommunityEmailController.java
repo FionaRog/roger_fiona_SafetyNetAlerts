@@ -10,7 +10,20 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-
+/**
+ * Contrôleur REST exposant l'endpoint permettant de récupérer
+ * les adresses e-mail des habitants d'une ville donnée.
+ *
+ * <p>Endpoint exposé : {@code GET /communityEmail?city=...}</p>
+ *
+ * <p>Responsabilité :
+ * recevoir la requête HTTP, déléguer la logique métier au service
+ * {@link ICommunityEmailService}, puis retourner le résultat au format JSON.</p>
+ *
+ * <p>Code HTTP retourné : {@code 200 OK} (liste vide si aucun résultat).</p>
+ *
+ * @since 1.0
+ */
 @RestController
 public class CommunityEmailController {
 
@@ -18,13 +31,25 @@ public class CommunityEmailController {
 
     private final ICommunityEmailService communityEmailService;
 
+    /**
+     * Construit le contrôleur Community Email.
+     *
+     * @param communityEmailService service métier associé
+     * @since 1.0
+     */
     public CommunityEmailController(ICommunityEmailService communityEmailService) {
         this.communityEmailService = communityEmailService;
     }
 
-
+    /**
+     * Endpoint permettant de récupérer les adresses e-mail
+     * correspondant à une ville donnée.
+     *
+     * @param city ville recherchée (paramètre obligatoire)
+     * @return liste des e-mails correspondants
+     */
     @GetMapping("/communityEmail")
-    public List<String> getCommunityEmails(@RequestParam String city) {
+    public List<String> getCommunityEmails(@RequestParam("city") String city) {
         logger.info("Received request GET /communityEmail?city={}", city);
         List<String> emails = communityEmailService.getEmailsByCity(city);
 

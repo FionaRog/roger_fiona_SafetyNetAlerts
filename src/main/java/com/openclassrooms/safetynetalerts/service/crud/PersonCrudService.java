@@ -9,16 +9,46 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Implémentation du service CRUD permettant de gérer les {@link Person}.
+ *
+ * <p>Les données sont manipulées en mémoire via {@code DataLoader.DATASOURCE}.</p>
+ *
+ * <p>Règles principales :</p>
+ * <ul>
+ *   <li>une personne est identifiée par le couple prénom + nom (comparaison insensible à la casse),</li>
+ *   <li>l'ajout est refusé si un doublon existe,</li>
+ *   <li>la mise à jour remplace les champs d'adresse et de contact,</li>
+ *   <li>la suppression retire l'entrée correspondante si elle existe.</li>
+ * </ul>
+ *
+ * @since 1.0
+ */
 @Service
 public class PersonCrudService implements IPersonCrudService {
 
     private static final Logger logger = LoggerFactory.getLogger(PersonCrudService.class);
 
+    /**
+     * Retourne l'ensemble des personnes.
+     *
+     * @return liste des {@link Person} (copie de la source)
+     * @since 1.0
+     */
     public List<Person> getPerson() {
         return new ArrayList<>(DataLoader.DATASOURCE.getPersons());
     }
 
-
+    /**
+     * Ajoute une nouvelle personne.
+     *
+     * <p>Refuse l'ajout si une personne existe déjà avec le même prénom et nom
+     * (comparaison insensible à la casse).</p>
+     *
+     * @param newPerson personne à ajouter
+     * @return {@code true} si ajoutée, {@code false} sinon
+     * @since 1.0
+     */
     public boolean addPerson(Person newPerson) {
 
         for(Person person : DataLoader.DATASOURCE.getPersons()) {
@@ -35,7 +65,22 @@ public class PersonCrudService implements IPersonCrudService {
         logger.debug("new person {} {} added ", newPerson.getFirstName(), newPerson.getLastName());
         return true;
     }
-
+    /**
+     * Met à jour une personne existante identifiée par prénom + nom.
+     *
+     * <p>Champs mis à jour :</p>
+     * <ul>
+     *   <li>adresse</li>
+     *   <li>ville</li>
+     *   <li>code postal</li>
+     *   <li>téléphone</li>
+     *   <li>email</li>
+     * </ul>
+     *
+     * @param updatedPerson personne contenant les champs mis à jour
+     * @return {@code true} si mise à jour effectuée, {@code false} sinon
+     * @since 1.0
+     */
     public boolean updatePerson(Person updatedPerson) {
 
         for (Person person : DataLoader.DATASOURCE.getPersons()) {
@@ -59,6 +104,16 @@ public class PersonCrudService implements IPersonCrudService {
         return false;
     }
 
+    /**
+     * Supprime une personne à partir du prénom et du nom.
+     *
+     * <p>Si {@code firstName} ou {@code lastName} est null/blanc, la suppression est refusée.</p>
+     *
+     * @param firstName prénom de la personne
+     * @param lastName nom de famille de la personne
+     * @return {@code true} si suppression effectuée, {@code false} sinon
+     * @since 1.0
+     */
     public boolean deletePerson(String firstName, String lastName) {
 
         if(firstName == null || firstName.isBlank() || lastName == null || lastName.isBlank()) {

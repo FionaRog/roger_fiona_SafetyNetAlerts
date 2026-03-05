@@ -8,22 +8,65 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Contrôleur REST exposant les opérations CRUD sur les personnes.
+ *
+ * <p>Endpoints exposés :</p>
+ * <ul>
+ *   <li>{@code GET /person}</li>
+ *   <li>{@code POST /person}</li>
+ *   <li>{@code PUT /person}</li>
+ *   <li>{@code DELETE /person?firstName=...&lastName=...}</li>
+ * </ul>
+ *
+ * <p>Responsabilité :
+ * adapter les requêtes HTTP vers le service {@link IPersonCrudService}
+ * et retourner les codes HTTP appropriés.</p>
+ *
+ * @since 1.0
+ */
 @RestController
 public class PersonCrudController {
 
     private final IPersonCrudService personCrudService;
 
+    /**
+     * Construit le contrôleur CRUD Person.
+     *
+     * @param personCrudService service métier associé
+     * @since 1.0
+     */
     public PersonCrudController(IPersonCrudService personCrudService) {
         this.personCrudService = personCrudService;
     }
 
+    /**
+     * Retourne l'ensemble des personnes.
+     *
+     * <p>Code HTTP : {@code 200 OK}.</p>
+     *
+     * @return liste des {@link Person}
+     * @since 1.0
+     */
     @GetMapping("/person")
     public List<Person> getPerson() {
 
         return personCrudService.getPerson();
     }
 
-
+    /**
+     * Ajoute une nouvelle personne.
+     *
+     * <p>Codes HTTP :</p>
+     * <ul>
+     *   <li>{@code 201 Created} si la personne est ajoutée</li>
+     *   <li>{@code 409 Conflict} si la personne existe déjà ou si les données sont invalides</li>
+     * </ul>
+     *
+     * @param person personne à ajouter
+     * @return réponse HTTP sans corps
+     * @since 1.0
+     */
     @PostMapping("/person")
     public ResponseEntity<Void> addPerson(@RequestBody Person person) {
 
@@ -33,7 +76,19 @@ public class PersonCrudController {
                 : ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
 
-
+    /**
+     * Met à jour une personne existante.
+     *
+     * <p>Codes HTTP :</p>
+     * <ul>
+     *   <li>{@code 204 No Content} si la mise à jour réussit</li>
+     *   <li>{@code 404 Not Found} si aucune personne ne correspond</li>
+     * </ul>
+     *
+     * @param person personne contenant les informations mises à jour
+     * @return réponse HTTP sans corps
+     * @since 1.0
+     */
     @PutMapping("/person")
     public ResponseEntity<Void> updatePerson(@RequestBody Person person) {
 
@@ -43,7 +98,20 @@ public class PersonCrudController {
                 : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
-
+    /**
+     * Supprime une personne à partir du prénom et du nom.
+     *
+     * <p>Codes HTTP :</p>
+     * <ul>
+     *   <li>{@code 204 No Content} si suppression effectuée</li>
+     *   <li>{@code 404 Not Found} si aucune personne ne correspond</li>
+     * </ul>
+     *
+     * @param firstName prénom de la personne
+     * @param lastName nom de famille de la personne
+     * @return réponse HTTP sans corps
+     * @since 1.0
+     */
     @DeleteMapping("/person")
     public ResponseEntity<Void> deletePerson(@RequestParam String firstName, @RequestParam String lastName) {
 

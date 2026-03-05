@@ -10,6 +10,20 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+/**
+ * Contrôleur REST exposant l'endpoint permettant de récupérer
+ * les numéros de téléphone des personnes couvertes par une station.
+ *
+ * <p>Responsabilité :
+ * recevoir la requête HTTP, déléguer la logique métier au service
+ * {@link IPhoneAlertService}, puis retourner le résultat au format JSON.</p>
+ *
+ * <p>Endpoint exposé : {@code GET /phoneAlert?firestation=...}</p>
+ *
+ * <p>Code HTTP retourné : {@code 200 OK} (liste vide si aucun résultat).</p>
+ *
+ * @since 1.0
+ */
 @RestController
 public class PhoneAlertController {
 
@@ -17,11 +31,24 @@ public class PhoneAlertController {
 
     private final IPhoneAlertService phoneAlertService;
 
+    /**
+     * Construit le contrôleur PhoneAlert.
+     *
+     * @param phoneAlertService service métier associé
+     * @since 1.0
+     */
     public PhoneAlertController (IPhoneAlertService phoneAlertService) {
         this.phoneAlertService = phoneAlertService;
     }
 
-
+    /**
+     * Endpoint permettant de retourner les numéros de téléphone
+     * correspondant à une station donnée.
+     *
+     * @param firestation numéro de station (paramètre obligatoire)
+     * @return liste des numéros de téléphone (peut être vide)
+     * @since 1.0
+     */
     @GetMapping("/phoneAlert")
     public List<String> getPhoneNumber(@RequestParam String firestation) {
         logger.info("Received request GET /phoneAlert?firestation={}",firestation);
