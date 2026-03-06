@@ -21,6 +21,20 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Firestation {
+    /**
+     * Construit une association entre une adresse et une caserne de pompiers.
+     *
+     <p>Ce constructeur facilite l'initialisation d'un {@link Firestation}
+     * lors de tests unitaires ou de créations programmatiques.</p>
+     *
+     *
+     * @param address adresse couverte par la station
+     * @param station numéro de la station de pompiers
+     */
+    public Firestation(String address, String station) {
+        this.address = address;
+        this.station = station;
+    }
 
     /**
      * Adresse couverte par la station.
