@@ -48,12 +48,16 @@ public class FireController {
      * @since 1.0
      */
     @GetMapping("/fire")
-    public FireResponseDTO getPersonsByAddress(@RequestParam ("address") String address) {
+    public FireResponseDTO getPersonsByAddress(@RequestParam("address") String address) {
         logger.info("Received request GET /fire?address={}", address);
         FireResponseDTO personsByAddress = fireService.getPersonByAddress(address);
 
+        int count = personsByAddress.getFirePersonDtos() == null
+                ? 0
+                : personsByAddress.getFirePersonDtos().size();
+
         logger.info("Fire success : {} persons returned for address '{}', at station {}",
-                personsByAddress.getFirePersonDtos().size(), address, personsByAddress.getStation());
+                count, address, personsByAddress.getStation());
         return personsByAddress;
 
     }

@@ -21,13 +21,14 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Firestation {
+
     /**
      * Adresse couverte par la station.
      */
     private String address;
+
     /**
      * Numéro de la station de pompiers.
      */
     private String station;
-
 }

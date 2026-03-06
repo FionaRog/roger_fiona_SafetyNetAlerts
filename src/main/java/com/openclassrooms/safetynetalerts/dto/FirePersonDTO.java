@@ -3,6 +3,7 @@ package com.openclassrooms.safetynetalerts.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,9 +30,6 @@ public class FirePersonDTO {
     /**
      * Numéro de téléphone de la personne.
      */
-    /**
-     * Numéro de téléphone de la personne.
-     */
     private String phone;
     /**
      * Âge de la personne (calculé à partir du dossier médical).
@@ -40,9 +38,9 @@ public class FirePersonDTO {
     /**
      * Liste des médicaments associés à la personne.
      */
-    private List<String> medications;
+    private List<String> medications = new ArrayList<>();
     /**
      * Liste des allergies associées à la personne.
      */
-    private List<String> allergies;
+    private List<String> allergies = new ArrayList<>();
 }

@@ -53,8 +53,12 @@ public class FirestationController {
         logger.info("Received request GET /firestation?stationNumber={}", stationNumber);
         FirestationResponseDTO personsByFirestation = firestationService.getPersonsByFirestation(stationNumber);
 
-        logger.info("Firestation success : {} persons returned for station '{}', including {} children and {} adults",
-                personsByFirestation.getPeople().size(), stationNumber, personsByFirestation.getChildren(), personsByFirestation.getAdults());
+        int peopleCount = personsByFirestation.getPeople() == null
+                ? 0
+                : personsByFirestation.getPeople().size();
+
+        logger.info("Firestation success : {} persons returned for station '{}', including {} (children={}, adults={})",
+                peopleCount, stationNumber, personsByFirestation.getChildren(), personsByFirestation.getAdults());
         return personsByFirestation;
     }
 

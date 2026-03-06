@@ -26,35 +26,35 @@ public interface IMedicalRecordCrudService {
      * Ajoute un nouveau dossier médical.
      *
      * <p>L'ajout est refusé si un dossier existe déjà avec le même prénom et nom
-     * (comparaison insensible à la casse).</p>
+     * (comparaison après normalisation (trim + lowercase)).</p>
      *
      * @param newMedicalRecord dossier médical à ajouter
      * @return {@code true} si le dossier est ajouté, {@code false} sinon
      * @since 1.0
      */
-   boolean addMedicalRecord (MedicalRecord newMedicalRecord);
+    boolean addMedicalRecord(MedicalRecord newMedicalRecord);
 
     /**
      * Met à jour un dossier médical existant.
      *
      * <p>Le dossier à mettre à jour est identifié par prénom + nom
-     * (comparaison insensible à la casse).</p>
+     * (comparaison après normalisation (trim + lowercase)).</p>
      *
      * @param updatedMedicalRecord dossier médical contenant les informations mises à jour
      * @return {@code true} si la mise à jour est effectuée, {@code false} sinon
      * @since 1.0
      */
-    boolean updateMedicalRecord (MedicalRecord updatedMedicalRecord);
+    boolean updateMedicalRecord(MedicalRecord updatedMedicalRecord);
 
     /**
      * Supprime un dossier médical à partir du prénom et du nom.
      *
      * @param firstName prénom de la personne
-     * @param lastName nom de famille de la personne
+     * @param lastName  nom de famille de la personne
      * @return {@code true} si la suppression est effectuée, {@code false} sinon
      * @since 1.0
      */
-    boolean deletedMedicalRecord (String firstName, String lastName);
+    boolean deleteMedicalRecord(String firstName, String lastName);
 
 
 }

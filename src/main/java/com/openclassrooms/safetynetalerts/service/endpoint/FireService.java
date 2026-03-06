@@ -8,6 +8,7 @@ import com.openclassrooms.safetynetalerts.model.MedicalRecord;
 import com.openclassrooms.safetynetalerts.model.Person;
 import com.openclassrooms.safetynetalerts.repository.DataLoader;
 import com.openclassrooms.safetynetalerts.utils.AgeUtils;
+import com.openclassrooms.safetynetalerts.utils.StringNormalizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,6 @@ import java.util.List;
  *   <li>si la date de naissance est absente/invalide, l'âge est renseigné à {@code 0}.</li>
  * </ul>
  *
- *
  * @since 1.0
  */
 @Service
@@ -52,7 +52,7 @@ public class FireService implements IFireService {
      * @param fireMapper mapper MapStruct utilisé pour construire les DTO
      * @since 1.0
      */
-    public FireService (FireMapper fireMapper) {
+    public FireService(FireMapper fireMapper) {
         this.fireMapper = fireMapper;
     }
 
@@ -66,19 +66,22 @@ public class FireService implements IFireService {
     public FireResponseDTO getPersonByAddress(String address) {
         logger.debug("Fire request: address='{}'", address);
 
-        if(address == null || address.isBlank()) {
+        if (address == null || address.isBlank()) {
             logger.debug("Fire rejected : address is null/blank");
             return new FireResponseDTO();
         }
 
-        String stationNumber = findStationByAddress(address);
-          if(stationNumber == null) {
+        String targetAddress = StringNormalizer.norm(address);
+
+        String stationNumber = findStationByAddress(targetAddress);
+
+        if (stationNumber == null) {
             logger.debug("Fire rejected : no station found for {}", address);
             return new FireResponseDTO();
         }
         logger.debug("Fire: station '{}' found at address {}", stationNumber, address);
 
-        List<Person> personsAtAddress = findPersonsByAddress(address);
+        List<Person> personsAtAddress = findPersonsByAddress(targetAddress);
         logger.debug("Fire: {} person(s) found at address='{}'", personsAtAddress.size(), address);
 
         if (personsAtAddress.isEmpty()) {
@@ -101,21 +104,21 @@ public class FireService implements IFireService {
     }
 
 
-
 // ----------------------- HELPERS -------------------------------
+
     /**
      * Recherche le numéro de station couvrant l'adresse donnée.
      *
-     * <p>La comparaison d'adresse est insensible à la casse.</p>
+     * <p>La comparaison d'adresse est réalisée après normalisation (trim + lowercase).</p>
      *
      * @param address adresse recherchée
      * @return numéro de station, ou {@code null} si aucune correspondance
      */
     private String findStationByAddress(String address) {
-        for (Firestation fs: DataLoader.DATASOURCE.getFirestations()) {
-            if(fs == null || fs.getAddress() == null) continue;
+        for (Firestation fs : DataLoader.DATASOURCE.getFirestations()) {
+            if (fs == null || fs.getAddress() == null) continue;
 
-            if(fs.getAddress().equalsIgnoreCase(address)) {
+            if (StringNormalizer.same(fs.getAddress(), address)) {
                 return fs.getStation();
             }
         }
@@ -125,7 +128,7 @@ public class FireService implements IFireService {
     /**
      * Recherche les personnes vivant à l'adresse donnée.
      *
-     * <p>La comparaison est insensible à la casse.</p>
+     * <p>La comparaison est réalisée après normalisation (trim + lowercase).</p>
      *
      * <p>Les entrées null sont ignorées. La liste retournée
      * n'est jamais {@code null}.</p>
@@ -136,10 +139,10 @@ public class FireService implements IFireService {
     private List<Person> findPersonsByAddress(String address) {
         List<Person> result = new ArrayList<>();
 
-        for(Person p: DataLoader.DATASOURCE.getPersons()) {
-            if(p == null || p.getAddress()== null) continue;
+        for (Person p : DataLoader.DATASOURCE.getPersons()) {
+            if (p == null || p.getAddress() == null) continue;
 
-            if(p.getAddress().equalsIgnoreCase(address)) {
+            if (StringNormalizer.same(p.getAddress(), address)) {
                 result.add(p);
             }
         }
@@ -164,7 +167,7 @@ public class FireService implements IFireService {
             int age = 0;
             if (mr != null && mr.getBirthdate() != null && !mr.getBirthdate().isBlank()) {
                 try {
-                    age= AgeUtils.calculateAge(mr.getBirthdate());
+                    age = AgeUtils.calculateAge(mr.getBirthdate());
                 } catch (Exception e) {
                     logger.error("Fire: cannot parse birthdate='{}' for {} {}",
                             mr.getBirthdate(), p.getFirstName(), p.getLastName(), e);
@@ -183,25 +186,25 @@ public class FireService implements IFireService {
     /**
      * Recherche le dossier médical correspondant au prénom et nom fournis.
      *
-     * <p>La comparaison est insensible à la casse.</p>
+     * <p>La comparaison est réalisée après normalisation (trim + lowercase).</p>
      *
      * <p>Retourne {@code null} si aucun dossier n'est trouvé
      * ou si les paramètres sont null.</p>
      *
      * @param firstName prénom recherché
-     * @param lastName nom recherché
+     * @param lastName  nom recherché
      * @return {@link MedicalRecord} correspondant, ou {@code null} si absent
      */
     private MedicalRecord findMedicalRecordByName(String firstName, String lastName) {
         if (firstName == null || lastName == null) {
-            return  null;
+            return null;
         }
 
-        for(MedicalRecord mr : DataLoader.DATASOURCE.getMedicalrecords()) {
-            if(mr == null) continue;;
-            if(mr.getFirstName() != null && mr.getLastName() != null
-                && mr.getFirstName().equalsIgnoreCase(firstName)
-                && mr.getLastName().equalsIgnoreCase(lastName)) {
+        for (MedicalRecord mr : DataLoader.DATASOURCE.getMedicalrecords()) {
+            if (mr == null) continue;
+
+            if (StringNormalizer.same(mr.getFirstName(), firstName)
+                    && StringNormalizer.same(mr.getLastName(), lastName)) {
                 return mr;
             }
         }

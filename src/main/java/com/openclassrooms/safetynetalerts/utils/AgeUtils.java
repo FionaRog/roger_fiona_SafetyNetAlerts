@@ -40,23 +40,21 @@ public final class AgeUtils {
      *
      * @param birthDate date de naissance sous forme de chaîne
      * @return âge calculé en années
-     *
      * @throws IllegalArgumentException si la date est null, vide
-     * ou si le format est invalide
-     *
+     *                                  ou si le format est invalide
      * @since 1.0
      */
     public static int calculateAge(String birthDate) {
         if (birthDate == null || birthDate.isBlank()) {
             throw new IllegalArgumentException("birthdate is null/blank");
-
         }
 
         try {
             LocalDate birthFormatted = LocalDate.parse(birthDate, FORMATTER);
             return Period.between(birthFormatted, LocalDate.now()).getYears();
         } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("Invalid birthdate format (expected MM/dd/yyyy):" + birthDate, e);
+            throw new IllegalArgumentException(
+                    "Invalid birthdate format (expected MM/dd/yyyy): " + birthDate, e);
         }
     }
 }

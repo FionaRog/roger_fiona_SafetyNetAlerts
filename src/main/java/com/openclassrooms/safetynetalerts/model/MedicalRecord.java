@@ -3,6 +3,7 @@ package com.openclassrooms.safetynetalerts.model;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,9 +17,10 @@ import java.util.List;
  *
  * @since 1.0
  */
-@Setter
 @Getter
+@Setter
 public class MedicalRecord {
+
     /**
      * Prénom de la personne associée au dossier médical.
      */
@@ -36,9 +38,9 @@ public class MedicalRecord {
     /**
      * Liste des médicaments pris par la personne.
      */
-    private List<String> medications;
+    private List<String> medications = new ArrayList<>();
     /**
      * Liste des allergies de la personne.
      */
-    private List<String> allergies;
+    private List<String> allergies = new ArrayList<>();
 }

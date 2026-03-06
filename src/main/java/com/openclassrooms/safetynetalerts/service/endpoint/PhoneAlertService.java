@@ -3,6 +3,7 @@ package com.openclassrooms.safetynetalerts.service.endpoint;
 import com.openclassrooms.safetynetalerts.model.Firestation;
 import com.openclassrooms.safetynetalerts.model.Person;
 import com.openclassrooms.safetynetalerts.repository.DataLoader;
+import com.openclassrooms.safetynetalerts.utils.StringNormalizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -68,6 +69,7 @@ public class PhoneAlertService implements IPhoneAlertService {
 
 
     // ----------------------- HELPERS ---------------------------------
+
     /**
      * Construit l'ensemble des adresses couvertes par la station fournie.
      *
@@ -83,9 +85,9 @@ public class PhoneAlertService implements IPhoneAlertService {
         Set<String> coveredAdresses = new HashSet<>();
 
         for (Firestation fs : DataLoader.DATASOURCE.getFirestations()) {
-            if (fs.getStation() !=null && normalize(fs.getStation()).equals(normalize(firestation))) {
-                if(fs.getAddress() !=null && !fs.getAddress().isBlank()) {
-                    coveredAdresses.add(normalize(fs.getAddress()));
+            if (fs.getStation() != null && StringNormalizer.same(fs.getStation(), firestation)) {
+                if (fs.getAddress() != null && !fs.getAddress().isBlank()) {
+                    coveredAdresses.add(StringNormalizer.norm(fs.getAddress()));
                 }
             }
         }
@@ -105,26 +107,18 @@ public class PhoneAlertService implements IPhoneAlertService {
     private Set<String> collectPhonesByAddress(Set<String> coveredAdresses) {
         Set<String> uniquePhones = new HashSet<>();
 
-        for(Person person : DataLoader.DATASOURCE.getPersons()) {
-            if (person.getAddress() !=null) {
-                String personAdress = normalize(person.getAddress());
+        for (Person person : DataLoader.DATASOURCE.getPersons()) {
+            if (person.getAddress() != null) {
+
+                String personAdress = StringNormalizer.norm(person.getAddress());
+
                 if (coveredAdresses.contains(personAdress)) {
-                    if(person.getPhone() !=null && !person.getPhone().isBlank()) {
+                    if (person.getPhone() != null && !person.getPhone().isBlank()) {
                         uniquePhones.add(person.getPhone().trim());
                     }
                 }
             }
         }
         return uniquePhones;
-    }
-    /**
-     * Normalise une chaîne pour comparaison : {@code trim()} puis {@code toLowerCase()}.
-     *
-     * @param value valeur à normaliser (non null)
-     * @return valeur normalisée
-     * @throws NullPointerException si {@code value} est {@code null}
-     */
-    private String normalize(String value) {
-        return value.trim().toLowerCase();
     }
 }

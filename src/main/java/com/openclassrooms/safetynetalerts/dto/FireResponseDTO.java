@@ -3,6 +3,7 @@ package com.openclassrooms.safetynetalerts.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,7 +21,7 @@ public class FireResponseDTO {
     /**
      * Liste des personnes vivant à l'adresse fournie.
      */
-    private List<FirePersonDTO> firePersonDtos;
+    private List<FirePersonDTO> firePersonDtos = new ArrayList<>();
     /**
      * Numéro de la station couvrant l'adresse.
      */

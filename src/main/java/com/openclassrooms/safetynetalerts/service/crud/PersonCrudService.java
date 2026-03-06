@@ -2,6 +2,7 @@ package com.openclassrooms.safetynetalerts.service.crud;
 
 import com.openclassrooms.safetynetalerts.model.Person;
 import com.openclassrooms.safetynetalerts.repository.DataLoader;
+import com.openclassrooms.safetynetalerts.utils.StringNormalizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,7 @@ import java.util.List;
  *
  * <p>Règles principales :</p>
  * <ul>
- *   <li>une personne est identifiée par le couple prénom + nom (comparaison insensible à la casse),</li>
+ *   <li>une personne est identifiée par le couple prénom + nom (comparaison après normalisation (trim + lowercase)),</li>
  *   <li>l'ajout est refusé si un doublon existe,</li>
  *   <li>la mise à jour remplace les champs d'adresse et de contact,</li>
  *   <li>la suppression retire l'entrée correspondante si elle existe.</li>
@@ -43,17 +44,23 @@ public class PersonCrudService implements IPersonCrudService {
      * Ajoute une nouvelle personne.
      *
      * <p>Refuse l'ajout si une personne existe déjà avec le même prénom et nom
-     * (comparaison insensible à la casse).</p>
+     * (comparaison après normalisation (trim + lowercase)).</p>
      *
      * @param newPerson personne à ajouter
      * @return {@code true} si ajoutée, {@code false} sinon
      * @since 1.0
      */
     public boolean addPerson(Person newPerson) {
+        if (newPerson == null || newPerson.getFirstName() == null || newPerson.getLastName() == null) {
+            return false;
+        }
 
-        for(Person person : DataLoader.DATASOURCE.getPersons()) {
-            if(person.getFirstName().equalsIgnoreCase(newPerson.getFirstName())
-                && person.getLastName().equalsIgnoreCase(newPerson.getLastName())) {
+        for (Person person : DataLoader.DATASOURCE.getPersons()) {
+            if (person == null) continue;
+
+            if (StringNormalizer.same(person.getFirstName(), newPerson.getFirstName())
+                    && StringNormalizer.same(person.getLastName(), newPerson.getLastName())) {
+
                 logger.debug("Add person rejected : duplicate for {} {} ",
                         newPerson.getFirstName(), newPerson.getLastName());
                 return false;
@@ -65,6 +72,7 @@ public class PersonCrudService implements IPersonCrudService {
         logger.debug("new person {} {} added ", newPerson.getFirstName(), newPerson.getLastName());
         return true;
     }
+
     /**
      * Met à jour une personne existante identifiée par prénom + nom.
      *
@@ -82,10 +90,15 @@ public class PersonCrudService implements IPersonCrudService {
      * @since 1.0
      */
     public boolean updatePerson(Person updatedPerson) {
+        if (updatedPerson == null || updatedPerson.getFirstName() == null || updatedPerson.getLastName() == null) {
+            return false;
+        }
 
         for (Person person : DataLoader.DATASOURCE.getPersons()) {
-            if(person.getFirstName().equalsIgnoreCase(updatedPerson.getFirstName())
-                    && person.getLastName().equalsIgnoreCase(updatedPerson.getLastName())) {
+            if (person == null) continue;
+
+            if (StringNormalizer.same(person.getFirstName(), updatedPerson.getFirstName())
+                    && StringNormalizer.same(person.getLastName(), updatedPerson.getLastName())) {
 
                 person.setAddress(updatedPerson.getAddress());
                 person.setCity(updatedPerson.getCity());
@@ -110,23 +123,24 @@ public class PersonCrudService implements IPersonCrudService {
      * <p>Si {@code firstName} ou {@code lastName} est null/blanc, la suppression est refusée.</p>
      *
      * @param firstName prénom de la personne
-     * @param lastName nom de famille de la personne
+     * @param lastName  nom de famille de la personne
      * @return {@code true} si suppression effectuée, {@code false} sinon
      * @since 1.0
      */
     public boolean deletePerson(String firstName, String lastName) {
 
-        if(firstName == null || firstName.isBlank() || lastName == null || lastName.isBlank()) {
+        if (firstName == null || firstName.isBlank() || lastName == null || lastName.isBlank()) {
             logger.debug("Delete person rejected : firstName/LastName is null/blank");
             return false;
         }
         int before = DataLoader.DATASOURCE.getPersons().size();
 
         DataLoader.DATASOURCE.getPersons().removeIf(p ->
-                p.getFirstName() != null
-                && p.getLastName() != null
-                && p.getFirstName().equalsIgnoreCase(firstName)
-                && p.getLastName().equalsIgnoreCase(lastName)
+                p != null
+                        && p.getFirstName() != null
+                        && p.getLastName() != null
+                        && StringNormalizer.same(p.getFirstName(), firstName)
+                        && StringNormalizer.same(p.getLastName(), lastName)
         );
 
         int after = DataLoader.DATASOURCE.getPersons().size();

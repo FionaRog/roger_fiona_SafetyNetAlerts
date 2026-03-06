@@ -8,6 +8,7 @@ import com.openclassrooms.safetynetalerts.model.MedicalRecord;
 import com.openclassrooms.safetynetalerts.model.Person;
 import com.openclassrooms.safetynetalerts.repository.DataLoader;
 import com.openclassrooms.safetynetalerts.utils.AgeUtils;
+import com.openclassrooms.safetynetalerts.utils.StringNormalizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -31,11 +32,10 @@ import java.util.*;
  *   <li>le calcul enfant/adulte repose sur l'âge (enfant {@code <= 18}), si l'âge est calculable.</li>
  * </ul>
  *
- *
  * @since 1.0
  */
 @Service
-public class FirestationService implements IFirestationService{
+public class FirestationService implements IFirestationService {
 
     private static final Logger logger = LoggerFactory.getLogger(FirestationService.class);
 
@@ -52,6 +52,7 @@ public class FirestationService implements IFirestationService{
     }
 
 // --------------- CRUD ----------------------
+
     /**
      * Retourne la liste des mappings adresse ↔ station.
      *
@@ -59,7 +60,6 @@ public class FirestationService implements IFirestationService{
      * @since 1.0
      */
     public List<Firestation> getFirestation() {
-
         return new ArrayList<>(DataLoader.DATASOURCE.getFirestations());
     }
 
@@ -72,11 +72,12 @@ public class FirestationService implements IFirestationService{
      */
     public boolean addFirestation(Firestation newfirestation) {
 
-        if (newfirestation == null || newfirestation.getAddress() == null || newfirestation.getAddress().isBlank()) return false;
-        if(newfirestation.getStation() == null || newfirestation.getStation().isBlank()) return false;
+        if (newfirestation == null || newfirestation.getAddress() == null || newfirestation.getAddress().isBlank())
+            return false;
+        if (newfirestation.getStation() == null || newfirestation.getStation().isBlank()) return false;
 
-        for(Firestation firestation : DataLoader.DATASOURCE.getFirestations()) {
-            if (normalize(firestation.getAddress()).equals(normalize(newfirestation.getAddress()))) {
+        for (Firestation firestation : DataLoader.DATASOURCE.getFirestations()) {
+            if (StringNormalizer.same(firestation.getAddress(), newfirestation.getAddress())) {
                 logger.debug("Add firestation rejected : duplicate for address {} ", firestation.getAddress());
                 return false;
             }
@@ -97,11 +98,12 @@ public class FirestationService implements IFirestationService{
      */
     public boolean updateFirestationByAddress(Firestation updatedFirestation) {
 
-        if (updatedFirestation == null || updatedFirestation.getAddress() == null || updatedFirestation.getAddress().isBlank()) return false;
-        if(updatedFirestation.getStation() == null || updatedFirestation.getStation().isBlank()) return false;
+        if (updatedFirestation == null || updatedFirestation.getAddress() == null || updatedFirestation.getAddress().isBlank())
+            return false;
+        if (updatedFirestation.getStation() == null || updatedFirestation.getStation().isBlank()) return false;
 
         for (Firestation firestation : DataLoader.DATASOURCE.getFirestations()) {
-            if (normalize(firestation.getAddress()).equals(normalize(updatedFirestation.getAddress()))) {
+            if (StringNormalizer.same(firestation.getAddress(), updatedFirestation.getAddress())) {
 
                 firestation.setStation(updatedFirestation.getStation());
 
@@ -123,14 +125,16 @@ public class FirestationService implements IFirestationService{
      */
     public boolean deleteFirestationByAddress(String deletedAddress) {
 
-        if(deletedAddress == null || deletedAddress.isBlank()) {
+        if (deletedAddress == null || deletedAddress.isBlank()) {
             logger.debug("Delete firestation rejected : address is null/blank");
             return false;
         }
 
         int before = DataLoader.DATASOURCE.getFirestations().size();
         DataLoader.DATASOURCE.getFirestations()
-                .removeIf(fs -> fs.getAddress() != null && normalize(fs.getAddress()).equals(normalize(deletedAddress)));
+                .removeIf(fs ->
+                        fs.getAddress() != null &&
+                                StringNormalizer.same(fs.getAddress(), deletedAddress));
 
         int after = DataLoader.DATASOURCE.getFirestations().size();
 
@@ -154,7 +158,7 @@ public class FirestationService implements IFirestationService{
      */
     public boolean deleteFirestationByStation(String deletedStation) {
 
-        if(deletedStation == null || deletedStation.isBlank()) {
+        if (deletedStation == null || deletedStation.isBlank()) {
             logger.debug("Delete firestation rejected, station is null/blank");
             return false;
         }
@@ -162,7 +166,8 @@ public class FirestationService implements IFirestationService{
         int before = DataLoader.DATASOURCE.getFirestations().size();
         DataLoader.DATASOURCE.getFirestations().
                 removeIf(fs ->
-                        fs.getStation() != null && normalize(fs.getStation()).equals(normalize(deletedStation)));
+                        fs.getStation() != null &&
+                                StringNormalizer.same(fs.getStation(), deletedStation));
 
         int after = DataLoader.DATASOURCE.getFirestations().size();
 
@@ -178,6 +183,7 @@ public class FirestationService implements IFirestationService{
     }
 
 // ------------------- ENDPOINT ---------------------
+
     /**
      * Retourne les personnes couvertes par la station fournie ainsi que le nombre d'adultes et d'enfants.
      *
@@ -190,33 +196,30 @@ public class FirestationService implements IFirestationService{
      * @return {@link FirestationResponseDTO} contenant la liste des personnes et les compteurs adultes/enfants
      * @since 1.0
      */
-    public FirestationResponseDTO getPersonsByFirestation (String stationNumber) {
+    public FirestationResponseDTO getPersonsByFirestation(String stationNumber) {
         logger.debug("Firestation request: station='{}'", stationNumber);
 
         if (stationNumber == null || stationNumber.isBlank()) {
-           return new FirestationResponseDTO();
-        }
-
-        // Construction de la liste des adresses couvertes par la station
-        Set<String> coveredAddresses = finCoveredAddresses(stationNumber);
-        logger.debug("Found {} covered addresses for station {}", coveredAddresses.size(), stationNumber);
-
-        if( coveredAddresses.isEmpty()) {
             return new FirestationResponseDTO();
         }
 
-        // Créer un médical record pour les personnes
+        Set<String> coveredAddresses = findCoveredAddresses(stationNumber);
+
+        logger.debug("Found {} covered addresses for station {}", coveredAddresses.size(), stationNumber);
+
+        if (coveredAddresses.isEmpty()) {
+            return new FirestationResponseDTO();
+        }
+
         Map<String, MedicalRecord> medicalIndex = buildMedicalIndex();
         logger.debug("Medical index built with {} entries", medicalIndex.size());
 
-        // Initialiser la liste de réponse (people, adults, children)
         List<FirestationPersonDTO> people = new ArrayList<>();
 
-        //Ajout des personnes à la liste si correspondance avec adresse couverte
         int[] counts = new int[2];
+
         fillPeopleAndCount(coveredAddresses, medicalIndex, people, counts);
 
-        // Construction de la réponse
         FirestationResponseDTO response = new FirestationResponseDTO();
         response.setPeople(people);
         response.setAdults(counts[0]);
@@ -227,10 +230,11 @@ public class FirestationService implements IFirestationService{
 
 
 // ------------------ HELPERS -------------------
+
     /**
      * Construit l'ensemble des adresses couvertes par la station fournie.
      *
-     * <p>La comparaison du numéro de station est insensible à la casse.</p>
+     * <p>La comparaison du numéro de station est réalisée après normalisation (trim + lowercase).</p>
      *
      * <p>Les adresses null ou blanches sont ignorées.
      * Les adresses retournées sont normalisées (trim + lowercase).</p>
@@ -238,18 +242,20 @@ public class FirestationService implements IFirestationService{
      * @param stationNumber numéro de station recherché
      * @return ensemble des adresses couvertes (jamais {@code null})
      */
-    private Set<String> finCoveredAddresses(String stationNumber) {
-         Set<String> coveredAddresses = new HashSet<>();
+    private Set<String> findCoveredAddresses(String stationNumber) {
+        Set<String> coveredAddresses = new HashSet<>();
 
-            for(Firestation fs : DataLoader.DATASOURCE.getFirestations()) {
-                if(fs.getStation() !=null && normalize(fs.getStation()).equals(normalize(stationNumber))) {
-                    if(fs.getAddress() !=null && !fs.getAddress().isBlank()) {
-                    coveredAddresses.add(normalize(fs.getAddress()));
+        for (Firestation fs : DataLoader.DATASOURCE.getFirestations()) {
+            if (fs.getStation() != null &&
+                    StringNormalizer.same(fs.getStation(), stationNumber)) {
+
+                if (fs.getAddress() != null && !fs.getAddress().isBlank()) {
+                    coveredAddresses.add(StringNormalizer.norm(fs.getAddress()));
+                }
             }
         }
+        return coveredAddresses;
     }
-    return coveredAddresses;
-}
 
     /**
      * Construit un index des dossiers médicaux basé sur la clé
@@ -266,7 +272,9 @@ public class FirestationService implements IFirestationService{
 
         Map<String, MedicalRecord> medicalIndex = new HashMap<>();
 
-        for(MedicalRecord mr : DataLoader.DATASOURCE.getMedicalrecords()) {
+        for (MedicalRecord mr : DataLoader.DATASOURCE.getMedicalrecords()) {
+            if (mr == null) continue;
+
             String key = personKey(mr.getFirstName(), mr.getLastName());
             medicalIndex.put(key, mr);
         }
@@ -288,25 +296,27 @@ public class FirestationService implements IFirestationService{
      * <p>Les personnes sans âge calculable sont comptabilisées comme adultes.</p>
      *
      * @param coveredAddresses ensemble des adresses couvertes
-     * @param medicalIndex index des dossiers médicaux
-     * @param people liste des DTO à remplir
-     * @param counts tableau de taille 2 : index 0 = adultes, index 1 = enfants
+     * @param medicalIndex     index des dossiers médicaux
+     * @param people           liste des DTO à remplir
+     * @param counts           tableau de taille 2 : index 0 = adultes, index 1 = enfants
      */
-    private void fillPeopleAndCount( Set<String> coveredAddresses, Map<String, MedicalRecord> medicalIndex,
-                                     List<FirestationPersonDTO> people, int[] counts) {
-        for(Person person : DataLoader.DATASOURCE.getPersons()) {
-            if(person.getAddress() == null) continue;
+    private void fillPeopleAndCount(Set<String> coveredAddresses, Map<String, MedicalRecord> medicalIndex,
+                                    List<FirestationPersonDTO> people, int[] counts) {
+        for (Person person : DataLoader.DATASOURCE.getPersons()) {
+            if (person.getAddress() == null) continue;
 
-            String personAddress = normalize(person.getAddress());
-            if(!coveredAddresses.contains(personAddress)) continue;
+            String personAddress = StringNormalizer.norm(person.getAddress());
+
+            if (!coveredAddresses.contains(personAddress)) continue;
 
             FirestationPersonDTO dto = firestationMapper.toFirestationPersonDTO(person);
             people.add(dto);
 
             Integer age = resolveAge(person, medicalIndex);
-            if(age != null && age <= 18) {
-                counts[1] ++;
-            } else counts [0]++;
+
+            if (age != null && age <= 18) {
+                counts[1]++;
+            } else counts[0]++;
         }
     }
 
@@ -316,16 +326,16 @@ public class FirestationService implements IFirestationService{
      * <p>Retourne {@code null} si aucun dossier médical n'est trouvé
      * ou si la date de naissance est absente/invalide.</p>
      *
-     * @param person personne concernée
+     * @param person       personne concernée
      * @param medicalIndex index des dossiers médicaux
      * @return âge en années, ou {@code null} si non calculable
      */
     private Integer resolveAge(Person person, Map<String, MedicalRecord> medicalIndex) {
-        String key = personKey(person.getFirstName(),person.getLastName());
+        String key = personKey(person.getFirstName(), person.getLastName());
         MedicalRecord mr = medicalIndex.get(key);
 
-        if(mr == null || mr.getBirthdate() == null || mr.getBirthdate().isBlank()) {
-            logger.debug("No medicalRecord/birthdate for {} {}",person.getFirstName(),person.getLastName());
+        if (mr == null || mr.getBirthdate() == null || mr.getBirthdate().isBlank()) {
+            logger.debug("No medicalRecord/birthdate for {} {}", person.getFirstName(), person.getLastName());
             return null;
         }
 
@@ -339,30 +349,19 @@ public class FirestationService implements IFirestationService{
     }
 
     /**
-     * Normalise une chaîne de caractères pour comparaison.
-     *
-     * <p>Transformation appliquée : {@code trim()} puis {@code toLowerCase()}.
-     * Si la valeur est {@code null}, retourne une chaîne vide.</p>
-     *
-     * @param value valeur à normaliser
-     * @return valeur normalisée (jamais {@code null})
-     */
-    private String normalize(String value) {
-        return value == null ? "" : value.trim().toLowerCase();
-    }
-
-    /**
      * Construit une clé d'identification unique basée sur le prénom et le nom.
      *
      * <p>Les deux valeurs sont normalisées puis concaténées
      * sous la forme {@code prenom|nom}.</p>
      *
      * @param firstName prénom (peut être null)
-     * @param lastName nom (peut être null)
+     * @param lastName  nom (peut être null)
      * @return clé normalisée utilisée pour l'index médical
      */
     private String personKey(String firstName, String lastName) {
-        return normalize(firstName) + "|" + normalize(lastName);
+        return StringNormalizer.norm(firstName)
+                + "|"
+                + StringNormalizer.norm(lastName);
     }
 
 }

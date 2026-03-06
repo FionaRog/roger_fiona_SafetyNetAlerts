@@ -3,6 +3,7 @@ package com.openclassrooms.safetynetalerts.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,9 +37,9 @@ public class FloodPersonDTO {
     /**
      * Liste des médicaments associés à la personne.
      */
-    private List<String> medications;
+    private List<String> medications = new ArrayList<>();
     /**
      * Liste des allergies associées à la personne.
      */
-    private List<String> allergies;
+    private List<String> allergies = new ArrayList<>();
 }

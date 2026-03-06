@@ -36,7 +36,7 @@ public class MedicalRecordCrudController {
      * @param medicalRecordCrudService service métier associé
      * @since 1.0
      */
-    public MedicalRecordCrudController (IMedicalRecordCrudService medicalRecordCrudService) {
+    public MedicalRecordCrudController(IMedicalRecordCrudService medicalRecordCrudService) {
         this.medicalRecordCrudService = medicalRecordCrudService;
     }
 
@@ -49,7 +49,7 @@ public class MedicalRecordCrudController {
      * @since 1.0
      */
     @GetMapping("/medicalRecord")
-    public List<MedicalRecord>  getMedicalRecord() {
+    public List<MedicalRecord> getMedicalRecord() {
 
         return medicalRecordCrudService.getMedicalRecord();
     }
@@ -68,7 +68,7 @@ public class MedicalRecordCrudController {
      * @since 1.0
      */
     @PostMapping("/medicalRecord")
-    public ResponseEntity<Void> addMedicalRecord (@RequestBody MedicalRecord medicalRecord) {
+    public ResponseEntity<Void> addMedicalRecord(@RequestBody MedicalRecord medicalRecord) {
 
         boolean added = medicalRecordCrudService.addMedicalRecord(medicalRecord);
         return added
@@ -91,7 +91,7 @@ public class MedicalRecordCrudController {
      * @since 1.0
      */
     @PutMapping("/medicalRecord")
-    public ResponseEntity<Void> updateMedicalRecord (@RequestBody MedicalRecord medicalRecord) {
+    public ResponseEntity<Void> updateMedicalRecord(@RequestBody MedicalRecord medicalRecord) {
 
         boolean updated = medicalRecordCrudService.updateMedicalRecord(medicalRecord);
         return updated
@@ -109,14 +109,14 @@ public class MedicalRecordCrudController {
      * </ul>
      *
      * @param firstName prénom de la personne
-     * @param lastName nom de famille de la personne
+     * @param lastName  nom de famille de la personne
      * @return réponse HTTP sans corps
      * @since 1.0
      */
     @DeleteMapping("/medicalRecord")
-    public ResponseEntity<Void> deleteMedicalRecord (@RequestParam String firstName, @RequestParam String lastName) {
+    public ResponseEntity<Void> deleteMedicalRecord(@RequestParam String firstName, @RequestParam String lastName) {
 
-        boolean deleted = medicalRecordCrudService.deletedMedicalRecord(firstName, lastName);
+        boolean deleted = medicalRecordCrudService.deleteMedicalRecord(firstName, lastName);
         return deleted
                 ? ResponseEntity.noContent().build()
                 : ResponseEntity.status(HttpStatus.NOT_FOUND).build();

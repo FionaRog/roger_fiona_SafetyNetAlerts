@@ -3,6 +3,7 @@ package com.openclassrooms.safetynetalerts.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,12 +18,13 @@ import java.util.List;
 @Getter
 @Setter
 public class FloodHouseholdDTO {
-    /**
-     * Liste des résidents du foyer.
-     */
-    private List<FloodPersonDTO> residents;
+
     /**
      * Adresse du foyer.
      */
     private String address;
+    /**
+     * Liste des résidents du foyer.
+     */
+    private List<FloodPersonDTO> residents = new ArrayList<>();
 }

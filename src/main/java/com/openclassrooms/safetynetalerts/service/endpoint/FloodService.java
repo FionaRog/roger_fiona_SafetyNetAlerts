@@ -8,6 +8,7 @@ import com.openclassrooms.safetynetalerts.model.MedicalRecord;
 import com.openclassrooms.safetynetalerts.model.Person;
 import com.openclassrooms.safetynetalerts.repository.DataLoader;
 import com.openclassrooms.safetynetalerts.utils.AgeUtils;
+import com.openclassrooms.safetynetalerts.utils.StringNormalizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -34,11 +35,10 @@ import java.util.*;
  *   <li>si l'âge n'est pas calculable, il est renseigné à {@code 0}.</li>
  * </ul>
  *
- *
  * @since 1.0
  */
 @Service
-public class FloodService implements IFloodService{
+public class FloodService implements IFloodService {
 
     private static final Logger logger = LoggerFactory.getLogger(FloodService.class);
 
@@ -50,7 +50,7 @@ public class FloodService implements IFloodService{
      * @param floodMapper mapper MapStruct utilisé pour construire les DTO
      * @since 1.0
      */
-    public FloodService (FloodMapper floodMapper) {
+    public FloodService(FloodMapper floodMapper) {
         this.floodMapper = floodMapper;
     }
 
@@ -73,15 +73,15 @@ public class FloodService implements IFloodService{
         }
 
         Set<String> stationSet = new HashSet<>();
-        for(String s : stations) {
+        for (String s : stations) {
             if (s == null || s.isBlank()) continue;
-            stationSet.add(s.trim());
+            stationSet.add(StringNormalizer.norm(s));
         }
 
-        Set<String> coveredAddresses = findCoveredAddresses (stationSet);
+        Set<String> coveredAddresses = findCoveredAddresses(stationSet);
         logger.debug("Flood: {} covered addresses found for stations={}", coveredAddresses.size(), stationSet);
 
-        if(coveredAddresses.isEmpty()) {
+        if (coveredAddresses.isEmpty()) {
             logger.debug("Flood: no covered addresses found");
             return List.of();
         }
@@ -92,17 +92,17 @@ public class FloodService implements IFloodService{
         Map<String, List<Person>> personsByAddress = groupPersons(coveredAddresses);
         logger.debug("Flood: {} household(s) matched", personsByAddress.size());
 
-        if(personsByAddress.isEmpty()) {
+        if (personsByAddress.isEmpty()) {
             return List.of();
         }
 
         List<FloodHouseholdDTO> households = new ArrayList<>();
 
-        for(Map.Entry<String, List<Person>> entry : personsByAddress.entrySet()) {
+        for (Map.Entry<String, List<Person>> entry : personsByAddress.entrySet()) {
             String addressKey = entry.getKey();
             List<Person> persons = entry.getValue();
 
-            List<FloodPersonDTO> residents = buildResidents (persons, medicalIndex);
+            List<FloodPersonDTO> residents = buildResidents(persons, medicalIndex);
 
             FloodHouseholdDTO household = new FloodHouseholdDTO();
             household.setAddress(addressKey);
@@ -116,6 +116,7 @@ public class FloodService implements IFloodService{
     }
 
 // ----------------------- HELPERS ------------------------------
+
     /**
      * Construit l'ensemble des adresses couvertes par les stations fournies.
      *
@@ -132,11 +133,12 @@ public class FloodService implements IFloodService{
         for (Firestation fs : firestations) {
             if (fs == null || fs.getStation() == null || fs.getAddress() == null) continue;
 
-            String st = fs.getStation().trim();
+            String st = StringNormalizer.norm(fs.getStation());
+
             if (!stationSet.contains(st)) continue;
 
             if (!fs.getAddress().isBlank()) {
-                coveredAddresses.add(normalize(fs.getAddress()));
+                coveredAddresses.add(StringNormalizer.norm(fs.getAddress()));
             }
         }
         return coveredAddresses;
@@ -152,7 +154,8 @@ public class FloodService implements IFloodService{
     private Map<String, MedicalRecord> buildMedicalIndex() {
         Map<String, MedicalRecord> medicalIndex = new HashMap<>();
 
-        for(MedicalRecord mr : DataLoader.DATASOURCE.getMedicalrecords()) {
+        for (MedicalRecord mr : DataLoader.DATASOURCE.getMedicalrecords()) {
+            if (mr == null) continue;
             String key = personKey(mr.getFirstName(), mr.getLastName());
             medicalIndex.put(key, mr);
         }
@@ -170,10 +173,10 @@ public class FloodService implements IFloodService{
     private Map<String, List<Person>> groupPersons(Set<String> coveredAddresses) {
         Map<String, List<Person>> result = new HashMap<>();
 
-        for(Person p : DataLoader.DATASOURCE.getPersons()) {
+        for (Person p : DataLoader.DATASOURCE.getPersons()) {
             if (p == null || p.getAddress() == null) continue;
 
-            String addrKey = normalize(p.getAddress());
+            String addrKey = StringNormalizer.norm(p.getAddress());
             if (!coveredAddresses.contains(addrKey)) continue;
 
             if (!result.containsKey(addrKey)) {
@@ -190,7 +193,7 @@ public class FloodService implements IFloodService{
      * <p>Retourne {@code 0} si le dossier médical est absent, si la date de naissance est absente/blanche,
      * ou si le calcul échoue.</p>
      *
-     * @param p personne concernée
+     * @param p  personne concernée
      * @param mr dossier médical (peut être null)
      * @return âge en années, ou {@code 0} si non calculable
      */
@@ -213,21 +216,21 @@ public class FloodService implements IFloodService{
      * <p>Pour chaque personne, tente d'associer un {@link MedicalRecord} via l'index
      * et calcule l'âge. Si non calculable, l'âge est renseigné à {@code 0}.</p>
      *
-     * @param persons résidents du foyer
+     * @param persons      résidents du foyer
      * @param medicalIndex index des dossiers médicaux
      * @return liste des résidents (jamais {@code null})
      */
     private List<FloodPersonDTO> buildResidents(List<Person> persons, Map<String, MedicalRecord> medicalIndex) {
         List<FloodPersonDTO> residents = new ArrayList<>();
 
-        for(Person p : persons) {
+        for (Person p : persons) {
             if (p == null) continue;
 
             MedicalRecord mr = medicalIndex.get(personKey(p.getFirstName(), p.getLastName()));
             int age = resolveAge(p, mr);
 
             FloodPersonDTO dto = floodMapper.toFloodPersonDTO(p, mr, age);
-            if(dto !=null) {
+            if (dto != null) {
                 residents.add(dto);
             }
         }
@@ -238,23 +241,12 @@ public class FloodService implements IFloodService{
      * Construit une clé d'index basée sur prénom et nom, après normalisation.
      *
      * @param firstName prénom (peut être null)
-     * @param lastName nom (peut être null)
+     * @param lastName  nom (peut être null)
      * @return clé sous la forme {@code prenom|nom}
      */
     private String personKey(String firstName, String lastName) {
-        return (firstName == null ? "" : normalize(firstName))
+        return (firstName == null ? "" : StringNormalizer.norm(firstName))
                 + "|"
-                + (lastName == null ? "" : normalize(lastName));
-    }
-
-    /**
-     * Normalise une chaîne pour comparaison : {@code trim()} puis {@code toLowerCase()}.
-     *
-     * @param value valeur à normaliser (non null)
-     * @return valeur normalisée
-     * @throws NullPointerException si {@code value} est {@code null}
-     */
-    private String normalize(String value) {
-        return value.trim().toLowerCase();
+                + (lastName == null ? "" : StringNormalizer.norm(lastName));
     }
 }

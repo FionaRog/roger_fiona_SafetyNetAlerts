@@ -2,13 +2,13 @@ package com.openclassrooms.safetynetalerts.service.crud;
 
 import com.openclassrooms.safetynetalerts.model.MedicalRecord;
 import com.openclassrooms.safetynetalerts.repository.DataLoader;
+import com.openclassrooms.safetynetalerts.utils.StringNormalizer;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Implémentation du service CRUD permettant de gérer les {@link MedicalRecord}.
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  *
  * <p>Règles principales :</p>
  * <ul>
- *   <li>un dossier médical est identifié par le couple prénom + nom (comparaison insensible à la casse),</li>
+ *   <li>un dossier médical est identifié par le couple prénom + nom (comparaison après normalisation (trim + lowercase)),</li>
  *   <li>l'ajout est refusé si un doublon existe,</li>
  *   <li>la mise à jour remplace birthdate, medications et allergies,</li>
  *   <li>la suppression retire l'entrée correspondante si elle existe.</li>
@@ -45,19 +45,29 @@ public class MedicalRecordCrudService implements IMedicalRecordCrudService {
      * Ajoute un nouveau dossier médical.
      *
      * <p>Refuse l'ajout si un dossier existe déjà avec le même prénom et nom
-     * (comparaison insensible à la casse).</p>
+     * (comparaison après normalisation (trim + lowercase)).</p>
      *
      * @param newMedicalRecord dossier médical à ajouter
      * @return {@code true} si ajouté, {@code false} sinon
      * @since 1.0
      */
-    public boolean addMedicalRecord (MedicalRecord newMedicalRecord) {
+    public boolean addMedicalRecord(MedicalRecord newMedicalRecord) {
 
-        for(MedicalRecord medicalRecord : DataLoader.DATASOURCE.getMedicalrecords()) {
-            if (medicalRecord.getFirstName().equalsIgnoreCase(newMedicalRecord.getFirstName())
-                    && medicalRecord.getLastName().equalsIgnoreCase(newMedicalRecord.getLastName())) {
+        if (newMedicalRecord == null
+                || newMedicalRecord.getFirstName() == null
+                || newMedicalRecord.getLastName() == null) {
+            return false;
+        }
+
+        for (MedicalRecord medicalRecord : DataLoader.DATASOURCE.getMedicalrecords()) {
+            if (medicalRecord == null) continue;
+
+            if (StringNormalizer.same(medicalRecord.getFirstName(), newMedicalRecord.getFirstName())
+                    && StringNormalizer.same(medicalRecord.getLastName(), newMedicalRecord.getLastName())) {
+
                 logger.debug("add medicalRecord rejected: duplicate for {} {}",
                         newMedicalRecord.getFirstName(), newMedicalRecord.getLastName());
+
                 return false;
             }
         }
@@ -65,8 +75,8 @@ public class MedicalRecordCrudService implements IMedicalRecordCrudService {
 
         logger.debug("medicalRecord added for {} {}",
                 newMedicalRecord.getFirstName(), newMedicalRecord.getLastName());
-        return true;
 
+        return true;
     }
 
     /**
@@ -83,11 +93,19 @@ public class MedicalRecordCrudService implements IMedicalRecordCrudService {
      * @return {@code true} si mise à jour effectuée, {@code false} sinon
      * @since 1.0
      */
-    public boolean updateMedicalRecord (MedicalRecord updatedMedicalRecord) {
+    public boolean updateMedicalRecord(MedicalRecord updatedMedicalRecord) {
 
-        for(MedicalRecord medicalRecord : DataLoader.DATASOURCE.getMedicalrecords()) {
-            if(medicalRecord.getFirstName().equalsIgnoreCase(updatedMedicalRecord.getFirstName())
-                    && medicalRecord.getLastName().equalsIgnoreCase(updatedMedicalRecord.getLastName())) {
+        if (updatedMedicalRecord == null
+                || updatedMedicalRecord.getFirstName() == null
+                || updatedMedicalRecord.getLastName() == null) {
+            return false;
+        }
+
+        for (MedicalRecord medicalRecord : DataLoader.DATASOURCE.getMedicalrecords()) {
+            if (medicalRecord == null) continue;
+
+            if (StringNormalizer.same(medicalRecord.getFirstName(), updatedMedicalRecord.getFirstName())
+                    && StringNormalizer.same(medicalRecord.getLastName(), updatedMedicalRecord.getLastName())) {
 
                 medicalRecord.setMedications(updatedMedicalRecord.getMedications());
                 medicalRecord.setAllergies(updatedMedicalRecord.getAllergies());
@@ -95,11 +113,13 @@ public class MedicalRecordCrudService implements IMedicalRecordCrudService {
 
                 logger.debug("medicalRecord updated for {} {}",
                         medicalRecord.getFirstName(), medicalRecord.getLastName());
+
                 return true;
             }
         }
         logger.debug("update medicalRecord rejected for {} {}",
                 updatedMedicalRecord.getFirstName(), updatedMedicalRecord.getLastName());
+
         return false;
     }
 
@@ -109,13 +129,13 @@ public class MedicalRecordCrudService implements IMedicalRecordCrudService {
      * <p>Si {@code firstName} ou {@code lastName} est null/blanc, la suppression est refusée.</p>
      *
      * @param firstName prénom de la personne
-     * @param lastName nom de famille de la personne
+     * @param lastName  nom de famille de la personne
      * @return {@code true} si suppression effectuée, {@code false} sinon
      * @since 1.0
      */
-    public boolean deletedMedicalRecord (String firstName, String lastName) {
+    public boolean deleteMedicalRecord(String firstName, String lastName) {
 
-        if(firstName == null || firstName.isBlank() || lastName == null || lastName.isBlank()) {
+        if (firstName == null || firstName.isBlank() || lastName == null || lastName.isBlank()) {
             logger.debug("Delete medicalRecord rejected, firstName/lastName is null/blank");
             return false;
         }
@@ -123,10 +143,11 @@ public class MedicalRecordCrudService implements IMedicalRecordCrudService {
         int before = DataLoader.DATASOURCE.getMedicalrecords().size();
 
         DataLoader.DATASOURCE.getMedicalrecords().removeIf(mr ->
-                mr.getFirstName() != null
-                && mr.getLastName() != null
-                && mr.getFirstName().toLowerCase().equalsIgnoreCase(firstName)
-                && mr.getLastName().toLowerCase().equalsIgnoreCase(lastName)
+                mr != null
+                        && mr.getFirstName() != null
+                        && mr.getLastName() != null
+                        && StringNormalizer.same(mr.getFirstName(), firstName)
+                        && StringNormalizer.same(mr.getLastName(), lastName)
         );
 
         int after = DataLoader.DATASOURCE.getMedicalrecords().size();

@@ -26,5 +26,5 @@ public interface IPersonInfoService {
      * @return liste de {@link PersonInfoDTO} (peut être vide)
      * @since 1.0
      */
-    List<PersonInfoDTO> getPersonsByLastName (String lastName);
+    List<PersonInfoDTO> getPersonsByLastName(String lastName);
 }

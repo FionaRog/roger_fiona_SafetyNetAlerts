@@ -5,6 +5,7 @@ import com.openclassrooms.safetynetalerts.model.Person;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,6 +20,7 @@ import java.util.List;
 @Getter
 @Setter
 public class PersonInfoDTO {
+
     /**
      * Prénom de la personne.
      */
@@ -42,9 +44,9 @@ public class PersonInfoDTO {
     /**
      * Liste des médicaments associés à la personne.
      */
-    private List<String> medications;
+    private List<String> medications = new ArrayList<>();
     /**
      * Liste des allergies associées à la personne.
      */
-    private List<String> allergies;
+    private List<String> allergies = new ArrayList<>();
 }

@@ -1,7 +1,6 @@
 package com.openclassrooms.safetynetalerts.mapper;
 
 import com.openclassrooms.safetynetalerts.dto.FirePersonDTO;
-
 import com.openclassrooms.safetynetalerts.model.MedicalRecord;
 import com.openclassrooms.safetynetalerts.model.Person;
 import org.mapstruct.Mapper;
@@ -24,13 +23,17 @@ public interface FireMapper {
      * Convertit une {@link Person} et son {@link MedicalRecord}
      * en {@link FirePersonDTO}.
      *
-     * @param person personne concernée
+     * @param person        personne concernée
      * @param medicalRecord dossier médical associé (peut être null)
-     * @param age âge calculé de la personne
+     * @param age           âge calculé de la personne
      * @return DTO correspondant
      */
     @Mapping(source = "person.firstName", target = "firstName")
     @Mapping(source = "person.lastName", target = "lastName")
+    @Mapping(source = "person.phone", target = "phone")
+    @Mapping(source = "medicalRecord.medications", target = "medications")
+    @Mapping(source = "medicalRecord.allergies", target = "allergies")
+    @Mapping(source = "age", target = "age")
     FirePersonDTO toFirePersonDTO(Person person, MedicalRecord medicalRecord, int age);
 
 }

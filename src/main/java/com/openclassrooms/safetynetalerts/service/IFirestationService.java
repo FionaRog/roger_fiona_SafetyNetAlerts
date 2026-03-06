@@ -14,7 +14,6 @@ import java.util.List;
  *   <li>la logique métier de l'endpoint {@code /firestation?stationNumber=...}.</li>
  * </ul>
  *
- *
  * @since 1.0
  */
 public interface IFirestationService {

@@ -3,6 +3,7 @@ package com.openclassrooms.safetynetalerts.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,7 +22,7 @@ public class FirestationResponseDTO {
     /**
      * Liste des personnes couvertes par la station.
      */
-    private List<FirestationPersonDTO> people;
+    private List<FirestationPersonDTO> people = new ArrayList<>();
     /**
      * Nombre total d'adultes parmi les personnes couvertes.
      */

@@ -108,7 +108,7 @@ public class PersonCrudController {
      * </ul>
      *
      * @param firstName prénom de la personne
-     * @param lastName nom de famille de la personne
+     * @param lastName  nom de famille de la personne
      * @return réponse HTTP sans corps
      * @since 1.0
      */

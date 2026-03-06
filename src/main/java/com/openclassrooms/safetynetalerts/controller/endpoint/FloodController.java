@@ -38,7 +38,7 @@ public class FloodController {
      * @param floodService service métier associé
      * @since 1.0
      */
-    public FloodController (IFloodService floodService) {
+    public FloodController(IFloodService floodService) {
         this.floodService = floodService;
     }
 
@@ -50,11 +50,13 @@ public class FloodController {
      * @since 1.0
      */
     @GetMapping("/flood/stations")
-    public List<FloodHouseholdDTO> getHouseholdsByStations (@RequestParam ("stations") List<String> stations) {
+    public List<FloodHouseholdDTO> getHouseholdsByStations(@RequestParam("stations") List<String> stations) {
         logger.info("Received request GET /flood/stations?stations={}", stations);
         List<FloodHouseholdDTO> householdsByStations = floodService.getHouseholdsByStations(stations);
 
-        logger.info("Flood success: response built with {} household(s)", householdsByStations.size());
+        int count = householdsByStations == null ? 0 : householdsByStations.size();
+
+        logger.info("Flood success: response built with {} household(s)", count);
         return householdsByStations;
     }
 }

@@ -49,11 +49,13 @@ public class PersonInfoController {
      * @since 1.0
      */
     @GetMapping("/personInfo")
-    public List<PersonInfoDTO> getPersonInfoByLastName (@RequestParam("lastName") String lastName) {
+    public List<PersonInfoDTO> getPersonInfoByLastName(@RequestParam("lastName") String lastName) {
         logger.info("Received request GET /personInfo?lastName={}", lastName);
         List<PersonInfoDTO> personInfoByLastName = personInfoService.getPersonsByLastName(lastName);
 
-        logger.info("PersonInfo success : {} persons returned with lastName {}", personInfoByLastName.size(), lastName);
+        int count = personInfoByLastName == null ? 0 : personInfoByLastName.size();
+
+        logger.info("PersonInfo success : {} persons returned with lastName '{}'", count, lastName);
         return personInfoByLastName;
 
     }

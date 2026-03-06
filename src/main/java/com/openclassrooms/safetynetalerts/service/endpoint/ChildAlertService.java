@@ -7,6 +7,7 @@ import com.openclassrooms.safetynetalerts.model.MedicalRecord;
 import com.openclassrooms.safetynetalerts.model.Person;
 import com.openclassrooms.safetynetalerts.repository.DataLoader;
 import com.openclassrooms.safetynetalerts.utils.AgeUtils;
+import com.openclassrooms.safetynetalerts.utils.StringNormalizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -35,11 +36,10 @@ import java.util.Map;
  *   <li>ignore une personne si son âge n'est pas calculable (birthdate absente/invalide).</li>
  * </ul>
  *
- *
  * @since 1.0
  */
 @Service
-public class ChildAlertService implements IChildAlertService{
+public class ChildAlertService implements IChildAlertService {
 
 
     private static final Logger logger = LoggerFactory.getLogger(ChildAlertService.class);
@@ -65,26 +65,25 @@ public class ChildAlertService implements IChildAlertService{
      *   <li>la liste des membres adultes du foyer.</li>
      * </ul>
      *
-     *
      * @param address adresse recherchée (peut être null ou blanche)
      * @return liste des enfants trouvés, ou liste vide si aucun enfant n'est trouvé
      * @since 1.0
      */
-     public List<ChildAlertDTO> getChildByAddress (String address) {
-         logger.debug("ChildAlert request: address='{}'", address);
+    public List<ChildAlertDTO> getChildByAddress(String address) {
+        logger.debug("ChildAlert request: address='{}'", address);
 
-        if(address == null || address.isBlank()) {
+        if (address == null || address.isBlank()) {
             logger.debug("ChildAlert rejected: address is null/blank");
             return List.of();
         }
 
-        String targetAddress = normalize(address);
+        String targetAddress = StringNormalizer.norm(address);
 
         Map<String, MedicalRecord> medicalIndex = buildMedicalIndex();
 
-         List<Person> household = findHouseholdByAddress(targetAddress);
-         logger.debug("ChildAlert: household size for address '{}' = {}",
-                 targetAddress, household.size());
+        List<Person> household = findHouseholdByAddress(targetAddress);
+        logger.debug("ChildAlert: household size for address '{}' = {}",
+                targetAddress, household.size());
 
         if (household.isEmpty()) {
             logger.debug("ChildAlert: no household found for address '{}'", targetAddress);
@@ -95,7 +94,7 @@ public class ChildAlertService implements IChildAlertService{
         List<ChildAlertDTO> children = new ArrayList<>();
 
         for (Person p : household) {
-            MedicalRecord mr = medicalIndex.get(personKey(p.getFirstName(),p.getLastName()));
+            MedicalRecord mr = medicalIndex.get(personKey(p.getFirstName(), p.getLastName()));
 
             Integer age = resolveAge(p, mr);
             if (age == null) continue;
@@ -110,15 +109,15 @@ public class ChildAlertService implements IChildAlertService{
             }
         }
 
-         logger.debug("ChildAlert: {} children and {} adults found for address '{}'",
-                 children.size(), adults.size(), targetAddress);
+        logger.debug("ChildAlert: {} children and {} adults found for address '{}'",
+                children.size(), adults.size(), targetAddress);
 
         if (children.isEmpty()) {
             logger.debug("ChildAlert: no children found for address '{}'", targetAddress);
             return List.of();
         }
 
-        for(ChildAlertDTO child : children) {
+        for (ChildAlertDTO child : children) {
             child.setHouseholdMembers(new ArrayList<>(adults));
         }
 
@@ -126,31 +125,20 @@ public class ChildAlertService implements IChildAlertService{
     }
 
 // --------------------- HELPERS -------------------------------
-    /**
-     * Normalise une valeur textuelle pour comparaison.
-     *
-     * <p>Règles : {@code trim()} puis {@code toLowerCase()}.</p>
-     *
-     * @param value texte à normaliser
-     * @return texte normalisé
-     */
-    private String normalize(String value) {
-        return value.trim().toLowerCase();
-    }
 
     /**
      * Construit une clé d'index stable pour associer {@link Person} et {@link MedicalRecord}.
      *
-     * <p>La clé est insensible à la casse et au padding via normalisation.</p>
+     * <p>La clé est comparée après normalisation (trim + lowercase).</p>
      *
      * @param firstName prénom (peut être null)
-     * @param lastName nom (peut être null)
+     * @param lastName  nom (peut être null)
      * @return clé sous la forme {@code firstname|lastname}
      */
-    private String personKey (String firstName, String lastName) {
-        return (firstName == null ? "" : normalize(firstName))
+    private String personKey(String firstName, String lastName) {
+        return (firstName == null ? "" : StringNormalizer.norm(firstName))
                 + "|"
-                + (lastName == null ? "" : normalize(lastName));
+                + (lastName == null ? "" : StringNormalizer.norm(lastName));
     }
 
     private Map<String, MedicalRecord> buildMedicalIndex() {
@@ -170,8 +158,8 @@ public class ChildAlertService implements IChildAlertService{
         List<Person> household = new ArrayList<>();
 
         for (Person p : DataLoader.DATASOURCE.getPersons()) {
-            if(p.getAddress() == null) continue;
-            if(normalize(p.getAddress()).equals(targetAddress)) {
+            if (p.getAddress() == null) continue;
+            if (StringNormalizer.same(p.getAddress(), targetAddress)) {
                 household.add(p);
             }
         }
@@ -183,7 +171,7 @@ public class ChildAlertService implements IChildAlertService{
      *
      * <p>Retourne {@code null} si la date de naissance est absente/blanche ou invalide.</p>
      *
-     * @param p personne concernée
+     * @param p  personne concernée
      * @param mr dossier médical (peut être null)
      * @return âge en années, ou {@code null} si non calculable
      */

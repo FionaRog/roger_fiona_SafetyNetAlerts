@@ -6,6 +6,7 @@ import com.openclassrooms.safetynetalerts.model.Person;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,13 +24,13 @@ public class SafetyNetDataDTO {
     /**
      * Liste des personnes enregistrées.
      */
-    private List<Person> persons;
+    private List<Person> persons = new ArrayList<>();
     /**
      * Liste des mappings adresse ↔ station.
      */
-    private List<Firestation> firestations;
+    private List<Firestation> firestations = new ArrayList<>();
     /**
      * Liste des dossiers médicaux.
      */
-    private List<MedicalRecord> medicalrecords;
+    private List<MedicalRecord> medicalrecords = new ArrayList<>();
 }

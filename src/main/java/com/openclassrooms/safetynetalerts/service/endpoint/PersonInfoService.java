@@ -6,6 +6,7 @@ import com.openclassrooms.safetynetalerts.model.MedicalRecord;
 import com.openclassrooms.safetynetalerts.model.Person;
 import com.openclassrooms.safetynetalerts.repository.DataLoader;
 import com.openclassrooms.safetynetalerts.utils.AgeUtils;
+import com.openclassrooms.safetynetalerts.utils.StringNormalizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -62,11 +63,10 @@ public class PersonInfoService implements IPersonInfoService {
     public List<PersonInfoDTO> getPersonsByLastName(String lastName) {
         logger.debug("PersonInfo request: lastName={}", lastName);
 
-        // Récupérer les infos de Person via lastName
         List<Person> matchedPersons = findPersonsByLastName(lastName);
         logger.debug("PersonInfo: {} persons found for lastName {}", matchedPersons.size(), lastName);
 
-        if(matchedPersons.isEmpty()) {
+        if (matchedPersons.isEmpty()) {
             logger.debug("PersonInfo : no persons found for lastName {}", lastName);
             return List.of();
         }
@@ -93,6 +93,7 @@ public class PersonInfoService implements IPersonInfoService {
     }
 
 // ------------------------ HELPERS ---------------------------------
+
     /**
      * Construit un index des dossiers médicaux basé sur la clé "prenom|nom" normalisée.
      *
@@ -104,6 +105,8 @@ public class PersonInfoService implements IPersonInfoService {
         Map<String, MedicalRecord> medicalIndex = new HashMap<>();
 
         for (MedicalRecord mr : DataLoader.DATASOURCE.getMedicalrecords()) {
+            if (mr == null) continue;
+
             String key = personKey(mr.getFirstName(), mr.getLastName());
             medicalIndex.put(key, mr);
         }
@@ -125,12 +128,13 @@ public class PersonInfoService implements IPersonInfoService {
             logger.debug("PersonInfo rejected: lastName is null/blank");
             return List.of();
         }
+
         List<Person> result = new ArrayList<>();
 
         for (Person p : DataLoader.DATASOURCE.getPersons()) {
             if (p == null || p.getLastName() == null) continue;
 
-            if (normalize(p.getLastName()).equals(normalize(lastName))) {
+            if (StringNormalizer.same(p.getLastName(), lastName)) {
                 result.add(p);
             }
         }
@@ -143,7 +147,7 @@ public class PersonInfoService implements IPersonInfoService {
      * <p>Retourne {@code 0} si le dossier médical est absent, si la date de naissance est absente/blanche,
      * ou si le calcul échoue.</p>
      *
-     * @param p personne concernée
+     * @param p  personne concernée
      * @param mr dossier médical (peut être null)
      * @return âge en années, ou {@code 0} si non calculable
      */
@@ -161,28 +165,15 @@ public class PersonInfoService implements IPersonInfoService {
     }
 
     /**
-     * Normalise une chaîne pour comparaison : {@code trim()} puis {@code toLowerCase()}.
-     *
-     * <p>Si la valeur est {@code null}, retourne une chaîne vide.</p>
-     *
-     * @param value valeur à normaliser
-     * @return valeur normalisée (jamais {@code null})
-     */
-    private String normalize(String value) {
-        return value == null ? "" : value.trim().toLowerCase();
-    }
-
-    /**
      * Construit une clé d'index basée sur prénom et nom, après normalisation.
      *
      * @param firstName prénom (peut être null)
-     * @param lastName nom (peut être null)
+     * @param lastName  nom (peut être null)
      * @return clé sous la forme {@code prenom|nom}
      */
     private String personKey(String firstName, String lastName) {
-        return (firstName == null ? "" : normalize(firstName))
+        return (firstName == null ? "" : StringNormalizer.norm(firstName))
                 + "|"
-                + (lastName == null ? "" : normalize(lastName));
-
+                + (lastName == null ? "" : StringNormalizer.norm(lastName));
     }
 }

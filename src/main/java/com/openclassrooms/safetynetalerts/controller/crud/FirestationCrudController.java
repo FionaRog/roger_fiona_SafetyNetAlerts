@@ -40,7 +40,7 @@ public class FirestationCrudController {
      * @param firestationService service métier associé
      * @since 1.0
      */
-    public FirestationCrudController (IFirestationService firestationService) {
+    public FirestationCrudController(IFirestationService firestationService) {
         this.firestationService = firestationService;
     }
 
@@ -52,7 +52,7 @@ public class FirestationCrudController {
      * @return liste des {@link Firestation}
      * @since 1.0
      */
-    @GetMapping(value= "/firestation", params = "!stationNumber")
+    @GetMapping(value = "/firestation", params = "!stationNumber")
     public List<Firestation> getMapping() {
 
         return firestationService.getFirestation();
@@ -67,7 +67,6 @@ public class FirestationCrudController {
      *   <li>{@code 409 Conflict} si le mapping existe déjà
      *       ou si les données sont invalides</li>
      * </ul>
-     *
      *
      * @param firestation mapping à ajouter
      * @return réponse HTTP sans corps
@@ -91,7 +90,6 @@ public class FirestationCrudController {
      *   <li>{@code 404 Not Found} si aucun mapping ne correspond à l'adresse</li>
      * </ul>
      *
-     *
      * @param firestation mapping contenant l'adresse cible et la nouvelle station
      * @return réponse HTTP sans corps
      * @since 1.0
@@ -114,12 +112,11 @@ public class FirestationCrudController {
      *   <li>{@code 404 Not Found} si aucun mapping ne correspond</li>
      * </ul>
      *
-     *
      * @param address adresse à supprimer
      * @return réponse HTTP sans corps
      * @since 1.0
      */
-    @DeleteMapping(value = "/firestation", params= "address")
+    @DeleteMapping(value = "/firestation", params = "address")
     public ResponseEntity<Void> deleteByAddress(@RequestParam String address) {
 
         boolean deleted = firestationService.deleteFirestationByAddress(address);
@@ -136,7 +133,6 @@ public class FirestationCrudController {
      *   <li>{@code 204 No Content} si suppression effectuée</li>
      *   <li>{@code 404 Not Found} si aucun mapping ne correspond</li>
      * </ul>
-     *
      *
      * @param station station à supprimer
      * @return réponse HTTP sans corps

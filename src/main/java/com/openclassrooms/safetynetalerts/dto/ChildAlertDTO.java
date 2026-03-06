@@ -3,6 +3,7 @@ package com.openclassrooms.safetynetalerts.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,5 +33,5 @@ public class ChildAlertDTO {
     /**
      * Liste des adultes vivant dans le même foyer.
      */
-    private List<AdultDTO> householdMembers;
+    private List<AdultDTO> householdMembers = new ArrayList<>();
 }

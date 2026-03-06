@@ -1,12 +1,11 @@
 package com.openclassrooms.safetynetalerts.controller.endpoint;
 
 import com.openclassrooms.safetynetalerts.service.endpoint.ICommunityEmailService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -47,6 +46,7 @@ public class CommunityEmailController {
      *
      * @param city ville recherchée (paramètre obligatoire)
      * @return liste des e-mails correspondants
+     * @since 1.0
      */
     @GetMapping("/communityEmail")
     public List<String> getCommunityEmails(@RequestParam("city") String city) {

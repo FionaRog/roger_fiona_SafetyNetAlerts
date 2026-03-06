@@ -21,13 +21,17 @@ public interface FloodMapper {
      * Convertit une {@link Person} et son {@link MedicalRecord}
      * en {@link FloodPersonDTO}.
      *
-     * @param person personne concernée
+     * @param person        personne concernée
      * @param medicalRecord dossier médical associé (peut être null)
-     * @param age âge calculé de la personne
+     * @param age           âge calculé de la personne
      * @return DTO correspondant
      */
     @Mapping(source = "person.firstName", target = "firstName")
     @Mapping(source = "person.lastName", target = "lastName")
+    @Mapping(source = "person.phone", target = "phone")
+    @Mapping(source = "medicalRecord.medications", target = "medications")
+    @Mapping(source = "medicalRecord.allergies", target = "allergies")
+    @Mapping(source = "age", target = "age")
     FloodPersonDTO toFloodPersonDTO(Person person, MedicalRecord medicalRecord, int age);
 
 }

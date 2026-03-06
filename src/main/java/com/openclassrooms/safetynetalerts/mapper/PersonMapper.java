@@ -6,8 +6,6 @@ import com.openclassrooms.safetynetalerts.model.Person;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import java.util.List;
-
 /**
  * Mapper MapStruct responsable de la transformation
  * des entités {@link Person} vers les DTO utilisés
@@ -23,7 +21,7 @@ public interface PersonMapper {
      * @param person personne à convertir
      * @return DTO adulte correspondant
      */
-    AdultDTO toAdultDto (Person person);
+    AdultDTO toAdultDto(Person person);
 
     /**
      * Convertit une {@link Person} en {@link ChildAlertDTO}.

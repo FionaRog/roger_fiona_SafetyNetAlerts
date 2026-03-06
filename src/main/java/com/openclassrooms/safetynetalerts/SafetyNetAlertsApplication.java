@@ -18,13 +18,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class SafetyNetAlertsApplication {
 
-	/**
-	 * Méthode principale permettant de lancer l'application.
-	 *
-	 * @param args arguments de ligne de commande
-	 */
-	public static void main(String[] args) {
-		SpringApplication.run(SafetyNetAlertsApplication.class, args);
-	}
+    /**
+     * Méthode principale permettant de lancer l'application.
+     *
+     * @param args arguments de ligne de commande
+     * @since 1.0
+     */
+    public static void main(String[] args) {
+
+        SpringApplication.run(SafetyNetAlertsApplication.class, args);
+    }
 
 }

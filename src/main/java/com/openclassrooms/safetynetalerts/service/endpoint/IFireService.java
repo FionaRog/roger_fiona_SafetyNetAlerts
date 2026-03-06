@@ -26,5 +26,5 @@ public interface IFireService {
      * @return {@link FireResponseDTO} résultat (peut être vide)
      * @since 1.0
      */
-    FireResponseDTO getPersonByAddress (String address);
+    FireResponseDTO getPersonByAddress(String address);
 }

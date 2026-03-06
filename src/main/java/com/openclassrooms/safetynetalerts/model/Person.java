@@ -17,6 +17,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Person {
+
     /**
      * Prénom de la personne.
      */
@@ -36,7 +37,6 @@ public class Person {
     /**
      * Code postal de la résidence.
      */
-
     private String zip;
     /**
      * Numéro de téléphone.
@@ -46,6 +46,4 @@ public class Person {
      * Adresse email de la personne.
      */
     private String email;
-
-
 }

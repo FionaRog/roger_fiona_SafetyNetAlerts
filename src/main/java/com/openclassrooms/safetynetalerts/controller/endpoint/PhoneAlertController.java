@@ -1,12 +1,11 @@
 package com.openclassrooms.safetynetalerts.controller.endpoint;
 
 import com.openclassrooms.safetynetalerts.service.endpoint.IPhoneAlertService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -37,7 +36,7 @@ public class PhoneAlertController {
      * @param phoneAlertService service métier associé
      * @since 1.0
      */
-    public PhoneAlertController (IPhoneAlertService phoneAlertService) {
+    public PhoneAlertController(IPhoneAlertService phoneAlertService) {
         this.phoneAlertService = phoneAlertService;
     }
 
@@ -50,11 +49,13 @@ public class PhoneAlertController {
      * @since 1.0
      */
     @GetMapping("/phoneAlert")
-    public List<String> getPhoneNumber(@RequestParam String firestation) {
-        logger.info("Received request GET /phoneAlert?firestation={}",firestation);
+    public List<String> getPhoneNumber(@RequestParam("firestation") String firestation) {
+        logger.info("Received request GET /phoneAlert?firestation={}", firestation);
         List<String> phoneByFirestation = phoneAlertService.getPhoneByFirestation(firestation);
 
-        logger.info("PhoneAlert success: {} phone numbers returned for station '{}'",phoneByFirestation.size(), firestation);
+        int count = phoneByFirestation == null ? 0 : phoneByFirestation.size();
+
+        logger.info("PhoneAlert success: {} phone numbers returned for station '{}'", count, firestation);
         return phoneByFirestation;
     }
 

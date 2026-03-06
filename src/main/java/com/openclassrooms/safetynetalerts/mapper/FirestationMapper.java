@@ -16,6 +16,7 @@ import java.util.List;
  */
 @Mapper(componentModel = "spring")
 public interface FirestationMapper {
+
     /**
      * Convertit une {@link Person} en {@link FirestationPersonDTO}.
      *
