@@ -21,6 +21,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Firestation {
+
+    public Firestation() {}
+
     /**
      * Construit une association entre une adresse et une caserne de pompiers.
      *

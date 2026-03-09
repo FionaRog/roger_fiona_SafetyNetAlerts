@@ -60,7 +60,7 @@ public class FirestationService implements IFirestationService {
      * @since 1.0
      */
     public List<Firestation> getFirestation() {
-        return new ArrayList<>(DataLoader.DATASOURCE.getFirestations());
+        return new ArrayList<>(DataLoader.FIRESTATIONS);
     }
 
     /**
@@ -76,13 +76,13 @@ public class FirestationService implements IFirestationService {
             return false;
         if (newfirestation.getStation() == null || newfirestation.getStation().isBlank()) return false;
 
-        for (Firestation firestation : DataLoader.DATASOURCE.getFirestations()) {
+        for (Firestation firestation : DataLoader.FIRESTATIONS) {
             if (StringNormalizer.same(firestation.getAddress(), newfirestation.getAddress())) {
                 logger.debug("Add firestation rejected : duplicate for address {} ", firestation.getAddress());
                 return false;
             }
         }
-        DataLoader.DATASOURCE.getFirestations().add(newfirestation);
+        DataLoader.FIRESTATIONS.add(newfirestation);
 
         logger.debug("firestation added with address {} and station {}",
                 newfirestation.getAddress(), newfirestation.getStation());
@@ -102,7 +102,7 @@ public class FirestationService implements IFirestationService {
             return false;
         if (updatedFirestation.getStation() == null || updatedFirestation.getStation().isBlank()) return false;
 
-        for (Firestation firestation : DataLoader.DATASOURCE.getFirestations()) {
+        for (Firestation firestation : DataLoader.FIRESTATIONS) {
             if (StringNormalizer.same(firestation.getAddress(), updatedFirestation.getAddress())) {
 
                 firestation.setStation(updatedFirestation.getStation());
@@ -130,13 +130,13 @@ public class FirestationService implements IFirestationService {
             return false;
         }
 
-        int before = DataLoader.DATASOURCE.getFirestations().size();
-        DataLoader.DATASOURCE.getFirestations()
+        int before = DataLoader.FIRESTATIONS.size();
+        DataLoader.FIRESTATIONS
                 .removeIf(fs ->
                         fs.getAddress() != null &&
                                 StringNormalizer.same(fs.getAddress(), deletedAddress));
 
-        int after = DataLoader.DATASOURCE.getFirestations().size();
+        int after = DataLoader.FIRESTATIONS.size();
 
         boolean deleted = after < before;
 
@@ -163,13 +163,13 @@ public class FirestationService implements IFirestationService {
             return false;
         }
 
-        int before = DataLoader.DATASOURCE.getFirestations().size();
-        DataLoader.DATASOURCE.getFirestations().
+        int before = DataLoader.FIRESTATIONS.size();
+        DataLoader.FIRESTATIONS.
                 removeIf(fs ->
                         fs.getStation() != null &&
                                 StringNormalizer.same(fs.getStation(), deletedStation));
 
-        int after = DataLoader.DATASOURCE.getFirestations().size();
+        int after = DataLoader.FIRESTATIONS.size();
 
         boolean deleted = after < before;
 
@@ -245,7 +245,7 @@ public class FirestationService implements IFirestationService {
     private Set<String> findCoveredAddresses(String stationNumber) {
         Set<String> coveredAddresses = new HashSet<>();
 
-        for (Firestation fs : DataLoader.DATASOURCE.getFirestations()) {
+        for (Firestation fs : DataLoader.FIRESTATIONS) {
             if (fs.getStation() != null &&
                     StringNormalizer.same(fs.getStation(), stationNumber)) {
 
@@ -272,7 +272,7 @@ public class FirestationService implements IFirestationService {
 
         Map<String, MedicalRecord> medicalIndex = new HashMap<>();
 
-        for (MedicalRecord mr : DataLoader.DATASOURCE.getMedicalrecords()) {
+        for (MedicalRecord mr : DataLoader.MEDICAL_RECORDS) {
             if (mr == null) continue;
 
             String key = personKey(mr.getFirstName(), mr.getLastName());
@@ -302,7 +302,7 @@ public class FirestationService implements IFirestationService {
      */
     private void fillPeopleAndCount(Set<String> coveredAddresses, Map<String, MedicalRecord> medicalIndex,
                                     List<FirestationPersonDTO> people, int[] counts) {
-        for (Person person : DataLoader.DATASOURCE.getPersons()) {
+        for (Person person : DataLoader.PERSONS) {
             if (person.getAddress() == null) continue;
 
             String personAddress = StringNormalizer.norm(person.getAddress());

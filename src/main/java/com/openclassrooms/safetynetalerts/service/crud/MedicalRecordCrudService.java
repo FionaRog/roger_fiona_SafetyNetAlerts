@@ -38,7 +38,7 @@ public class MedicalRecordCrudService implements IMedicalRecordCrudService {
      */
     public List<MedicalRecord> getMedicalRecord() {
 
-        return new ArrayList<>(DataLoader.DATASOURCE.getMedicalrecords());
+        return new ArrayList<>(DataLoader.MEDICAL_RECORDS);
     }
 
     /**
@@ -59,7 +59,7 @@ public class MedicalRecordCrudService implements IMedicalRecordCrudService {
             return false;
         }
 
-        for (MedicalRecord medicalRecord : DataLoader.DATASOURCE.getMedicalrecords()) {
+        for (MedicalRecord medicalRecord : DataLoader.MEDICAL_RECORDS) {
             if (medicalRecord == null) continue;
 
             if (StringNormalizer.same(medicalRecord.getFirstName(), newMedicalRecord.getFirstName())
@@ -71,7 +71,7 @@ public class MedicalRecordCrudService implements IMedicalRecordCrudService {
                 return false;
             }
         }
-        DataLoader.DATASOURCE.getMedicalrecords().add(newMedicalRecord);
+        DataLoader.MEDICAL_RECORDS.add(newMedicalRecord);
 
         logger.debug("medicalRecord added for {} {}",
                 newMedicalRecord.getFirstName(), newMedicalRecord.getLastName());
@@ -101,7 +101,7 @@ public class MedicalRecordCrudService implements IMedicalRecordCrudService {
             return false;
         }
 
-        for (MedicalRecord medicalRecord : DataLoader.DATASOURCE.getMedicalrecords()) {
+        for (MedicalRecord medicalRecord : DataLoader.MEDICAL_RECORDS) {
             if (medicalRecord == null) continue;
 
             if (StringNormalizer.same(medicalRecord.getFirstName(), updatedMedicalRecord.getFirstName())
@@ -140,9 +140,9 @@ public class MedicalRecordCrudService implements IMedicalRecordCrudService {
             return false;
         }
 
-        int before = DataLoader.DATASOURCE.getMedicalrecords().size();
+        int before = DataLoader.MEDICAL_RECORDS.size();
 
-        DataLoader.DATASOURCE.getMedicalrecords().removeIf(mr ->
+        DataLoader.MEDICAL_RECORDS.removeIf(mr ->
                 mr != null
                         && mr.getFirstName() != null
                         && mr.getLastName() != null
@@ -150,7 +150,7 @@ public class MedicalRecordCrudService implements IMedicalRecordCrudService {
                         && StringNormalizer.same(mr.getLastName(), lastName)
         );
 
-        int after = DataLoader.DATASOURCE.getMedicalrecords().size();
+        int after = DataLoader.MEDICAL_RECORDS.size();
 
         logger.debug("medicalRecord deleted for {} {}", firstName, lastName);
         return after < before;

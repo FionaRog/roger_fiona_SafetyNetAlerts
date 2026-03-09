@@ -37,7 +37,7 @@ public class PersonCrudService implements IPersonCrudService {
      * @since 1.0
      */
     public List<Person> getPerson() {
-        return new ArrayList<>(DataLoader.DATASOURCE.getPersons());
+        return new ArrayList<>(DataLoader.PERSONS);
     }
 
     /**
@@ -55,7 +55,7 @@ public class PersonCrudService implements IPersonCrudService {
             return false;
         }
 
-        for (Person person : DataLoader.DATASOURCE.getPersons()) {
+        for (Person person : DataLoader.PERSONS) {
             if (person == null) continue;
 
             if (StringNormalizer.same(person.getFirstName(), newPerson.getFirstName())
@@ -67,7 +67,7 @@ public class PersonCrudService implements IPersonCrudService {
             }
         }
 
-        DataLoader.DATASOURCE.getPersons().add(newPerson);
+        DataLoader.PERSONS.add(newPerson);
 
         logger.debug("new person {} {} added ", newPerson.getFirstName(), newPerson.getLastName());
         return true;
@@ -94,7 +94,7 @@ public class PersonCrudService implements IPersonCrudService {
             return false;
         }
 
-        for (Person person : DataLoader.DATASOURCE.getPersons()) {
+        for (Person person : DataLoader.PERSONS) {
             if (person == null) continue;
 
             if (StringNormalizer.same(person.getFirstName(), updatedPerson.getFirstName())
@@ -133,9 +133,9 @@ public class PersonCrudService implements IPersonCrudService {
             logger.debug("Delete person rejected : firstName/LastName is null/blank");
             return false;
         }
-        int before = DataLoader.DATASOURCE.getPersons().size();
+        int before = DataLoader.PERSONS.size();
 
-        DataLoader.DATASOURCE.getPersons().removeIf(p ->
+        DataLoader.PERSONS.removeIf(p ->
                 p != null
                         && p.getFirstName() != null
                         && p.getLastName() != null
@@ -143,7 +143,7 @@ public class PersonCrudService implements IPersonCrudService {
                         && StringNormalizer.same(p.getLastName(), lastName)
         );
 
-        int after = DataLoader.DATASOURCE.getPersons().size();
+        int after = DataLoader.PERSONS.size();
 
         boolean deleted = after < before;
 

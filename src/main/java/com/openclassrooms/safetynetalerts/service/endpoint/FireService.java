@@ -115,7 +115,7 @@ public class FireService implements IFireService {
      * @return numéro de station, ou {@code null} si aucune correspondance
      */
     private String findStationByAddress(String address) {
-        for (Firestation fs : DataLoader.DATASOURCE.getFirestations()) {
+        for (Firestation fs : DataLoader.FIRESTATIONS) {
             if (fs == null || fs.getAddress() == null) continue;
 
             if (StringNormalizer.same(fs.getAddress(), address)) {
@@ -139,7 +139,7 @@ public class FireService implements IFireService {
     private List<Person> findPersonsByAddress(String address) {
         List<Person> result = new ArrayList<>();
 
-        for (Person p : DataLoader.DATASOURCE.getPersons()) {
+        for (Person p : DataLoader.PERSONS) {
             if (p == null || p.getAddress() == null) continue;
 
             if (StringNormalizer.same(p.getAddress(), address)) {
@@ -200,7 +200,7 @@ public class FireService implements IFireService {
             return null;
         }
 
-        for (MedicalRecord mr : DataLoader.DATASOURCE.getMedicalrecords()) {
+        for (MedicalRecord mr : DataLoader.MEDICAL_RECORDS) {
             if (mr == null) continue;
 
             if (StringNormalizer.same(mr.getFirstName(), firstName)

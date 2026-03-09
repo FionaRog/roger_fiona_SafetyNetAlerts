@@ -145,7 +145,7 @@ public class ChildAlertService implements IChildAlertService {
 
         Map<String, MedicalRecord> index = new HashMap<>();
 
-        for (MedicalRecord mr : DataLoader.DATASOURCE.getMedicalrecords()) {
+        for (MedicalRecord mr : DataLoader.MEDICAL_RECORDS) {
             index.put(personKey(mr.getFirstName(), mr.getLastName()), mr);
         }
 
@@ -157,7 +157,7 @@ public class ChildAlertService implements IChildAlertService {
     private List<Person> findHouseholdByAddress(String targetAddress) {
         List<Person> household = new ArrayList<>();
 
-        for (Person p : DataLoader.DATASOURCE.getPersons()) {
+        for (Person p : DataLoader.PERSONS) {
             if (p.getAddress() == null) continue;
             if (StringNormalizer.same(p.getAddress(), targetAddress)) {
                 household.add(p);

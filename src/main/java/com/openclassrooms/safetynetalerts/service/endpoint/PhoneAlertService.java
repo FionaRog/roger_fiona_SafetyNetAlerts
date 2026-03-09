@@ -84,7 +84,7 @@ public class PhoneAlertService implements IPhoneAlertService {
     private Set<String> findCoveredAddressesByStation(String firestation) {
         Set<String> coveredAdresses = new HashSet<>();
 
-        for (Firestation fs : DataLoader.DATASOURCE.getFirestations()) {
+        for (Firestation fs : DataLoader.FIRESTATIONS) {
             if (fs.getStation() != null && StringNormalizer.same(fs.getStation(), firestation)) {
                 if (fs.getAddress() != null && !fs.getAddress().isBlank()) {
                     coveredAdresses.add(StringNormalizer.norm(fs.getAddress()));
@@ -107,7 +107,7 @@ public class PhoneAlertService implements IPhoneAlertService {
     private Set<String> collectPhonesByAddress(Set<String> coveredAdresses) {
         Set<String> uniquePhones = new HashSet<>();
 
-        for (Person person : DataLoader.DATASOURCE.getPersons()) {
+        for (Person person : DataLoader.PERSONS) {
             if (person.getAddress() != null) {
 
                 String personAdress = StringNormalizer.norm(person.getAddress());

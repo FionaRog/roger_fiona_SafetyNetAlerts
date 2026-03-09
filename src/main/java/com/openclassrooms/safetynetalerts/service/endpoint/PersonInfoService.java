@@ -104,7 +104,7 @@ public class PersonInfoService implements IPersonInfoService {
     private Map<String, MedicalRecord> buildMedicalIndex() {
         Map<String, MedicalRecord> medicalIndex = new HashMap<>();
 
-        for (MedicalRecord mr : DataLoader.DATASOURCE.getMedicalrecords()) {
+        for (MedicalRecord mr : DataLoader.MEDICAL_RECORDS) {
             if (mr == null) continue;
 
             String key = personKey(mr.getFirstName(), mr.getLastName());
@@ -131,7 +131,7 @@ public class PersonInfoService implements IPersonInfoService {
 
         List<Person> result = new ArrayList<>();
 
-        for (Person p : DataLoader.DATASOURCE.getPersons()) {
+        for (Person p : DataLoader.PERSONS) {
             if (p == null || p.getLastName() == null) continue;
 
             if (StringNormalizer.same(p.getLastName(), lastName)) {

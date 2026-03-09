@@ -53,7 +53,7 @@ public class CommunityEmailService implements ICommunityEmailService {
 
         Set<String> uniqueEmails = new HashSet<>();
 
-        for (Person person : DataLoader.DATASOURCE.getPersons()) {
+        for (Person person : DataLoader.PERSONS) {
 
             if (person.getCity() != null && StringNormalizer.same(person.getCity(), city)) {
 

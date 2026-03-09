@@ -129,7 +129,7 @@ public class FloodService implements IFloodService {
     private Set<String> findCoveredAddresses(Set<String> stationSet) {
         Set<String> coveredAddresses = new HashSet<>();
 
-        List<Firestation> firestations = DataLoader.DATASOURCE.getFirestations();
+        List<Firestation> firestations = DataLoader.FIRESTATIONS;
         for (Firestation fs : firestations) {
             if (fs == null || fs.getStation() == null || fs.getAddress() == null) continue;
 
@@ -154,7 +154,7 @@ public class FloodService implements IFloodService {
     private Map<String, MedicalRecord> buildMedicalIndex() {
         Map<String, MedicalRecord> medicalIndex = new HashMap<>();
 
-        for (MedicalRecord mr : DataLoader.DATASOURCE.getMedicalrecords()) {
+        for (MedicalRecord mr : DataLoader.MEDICAL_RECORDS) {
             if (mr == null) continue;
             String key = personKey(mr.getFirstName(), mr.getLastName());
             medicalIndex.put(key, mr);
@@ -173,7 +173,7 @@ public class FloodService implements IFloodService {
     private Map<String, List<Person>> groupPersons(Set<String> coveredAddresses) {
         Map<String, List<Person>> result = new HashMap<>();
 
-        for (Person p : DataLoader.DATASOURCE.getPersons()) {
+        for (Person p : DataLoader.PERSONS) {
             if (p == null || p.getAddress() == null) continue;
 
             String addrKey = StringNormalizer.norm(p.getAddress());

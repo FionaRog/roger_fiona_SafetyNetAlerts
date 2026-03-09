@@ -1,6 +1,9 @@
 package com.openclassrooms.safetynetalerts.repository;
 
 import com.openclassrooms.safetynetalerts.dto.SafetyNetDataDTO;
+import com.openclassrooms.safetynetalerts.model.Firestation;
+import com.openclassrooms.safetynetalerts.model.MedicalRecord;
+import com.openclassrooms.safetynetalerts.model.Person;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +15,8 @@ import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Composant Spring responsable du chargement des données
@@ -20,8 +25,17 @@ import java.io.InputStream;
  * <p>Les données sont lues depuis un fichier JSON situé dans le classpath
  * et sont désérialisées en {@link SafetyNetDataDTO} à l'aide de Jackson.</p>
  *
- * <p>Les données chargées sont stockées dans {@link #DATASOURCE},
- * qui sert de source de données en mémoire pour l'application.</p>
+ * * <p>Après désérialisation, les données sont réparties dans trois collections
+ *  * statiques en mémoire :</p>
+ *  * <ul>
+ *  *     <li>{@link #PERSONS}</li>
+ *  *     <li>{@link #MEDICAL_RECORDS}</li>
+ *  *     <li>{@link #FIRESTATIONS}</li>
+ *  * </ul>
+ *
+ *  * <p>Cette organisation permet aux services de l'application d'accéder
+ *  * directement aux collections nécessaires sans manipuler l'objet
+ *  * {@link SafetyNetDataDTO} complet.</p>
  *
  * <p>Le chargement est effectué au démarrage de l'application
  * via un {@link CommandLineRunner}.</p>
@@ -33,10 +47,15 @@ public class DataLoader {
 
     private static final Logger logger = LoggerFactory.getLogger(DataLoader.class);
 
+
     /**
-     * Source de données en mémoire utilisée par l'application.
+     * Source de donnée en mémoire utilisé par l'application.
      */
-    public static SafetyNetDataDTO DATASOURCE = new SafetyNetDataDTO();
+
+    public static List<Person> PERSONS = new ArrayList();
+    public static List<MedicalRecord> MEDICAL_RECORDS = new ArrayList();
+    public static List<Firestation> FIRESTATIONS = new ArrayList();
+
 
     /**
      * Chemin vers le fichier JSON contenant les données initiales.
@@ -61,7 +80,7 @@ public class DataLoader {
      * Charge les données depuis le fichier JSON et les désérialise
      * dans {@link SafetyNetDataDTO}.
      *
-     * <p>Les données sont ensuite stockées dans {@link #DATASOURCE}
+     * <p>Les données sont ensuite stockées dans {@link #PERSONS}, {@link #MEDICAL_RECORDS} et {@link #FIRESTATIONS}
      * afin d'être utilisées par les services de l'application.</p>
      *
      * @throws RuntimeException si le fichier ne peut pas être lu
@@ -82,13 +101,16 @@ public class DataLoader {
                     resource.getPath(), resource.contentLength());
 
         try (InputStream is = resource.getInputStream()) {
-            DATASOURCE = objectMapper.readValue(is, new TypeReference<SafetyNetDataDTO>() {
+            SafetyNetDataDTO dataSource = objectMapper.readValue(is, new TypeReference<SafetyNetDataDTO>() {
             });
+            MEDICAL_RECORDS = dataSource.getMedicalrecords();
+            PERSONS = dataSource.getPersons();
+            FIRESTATIONS = dataSource.getFirestations();
         }
 
-            int personsCount = DATASOURCE.getPersons() == null ? 0 : DATASOURCE.getPersons().size();
-            int firestationsCount = DATASOURCE.getFirestations() == null ? 0 : DATASOURCE.getFirestations().size();
-            int medicalCount = DATASOURCE.getMedicalrecords() == null ? 0 : DATASOURCE.getMedicalrecords().size();
+            int personsCount = PERSONS == null ? 0 : PERSONS.size();
+            int firestationsCount = FIRESTATIONS == null ? 0 : FIRESTATIONS.size();
+            int medicalCount = MEDICAL_RECORDS == null ? 0 : MEDICAL_RECORDS.size();
 
             logger.info("Datasource loaded: persons={}, firestations={}, medicalrecords={}",
                     personsCount, firestationsCount, medicalCount);

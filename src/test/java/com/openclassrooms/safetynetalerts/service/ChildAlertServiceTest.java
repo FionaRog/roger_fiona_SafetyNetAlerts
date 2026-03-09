@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
 @ExtendWith(MockitoExtension.class)
 class ChildAlertServiceTest {
 
@@ -35,15 +34,16 @@ class ChildAlertServiceTest {
 
     @BeforeEach
     void setUp() {
-        DataLoader.DATASOURCE = new SafetyNetDataDTO();
-    }
+        DataLoader.PERSONS.clear();
+        DataLoader.MEDICAL_RECORDS.clear();
+        DataLoader.FIRESTATIONS.clear();    }
 
     private void addPersons(Person... persons) {
-        DataLoader.DATASOURCE.getPersons().addAll(List.of(persons));
+        DataLoader.PERSONS.addAll(List.of(persons));
     }
 
     private void addMedicalRecords(MedicalRecord... records) {
-        DataLoader.DATASOURCE.getMedicalrecords().addAll(List.of(records));
+        DataLoader.MEDICAL_RECORDS.addAll(List.of(records));
     }
 
 
@@ -66,7 +66,7 @@ class ChildAlertServiceTest {
     @Test
     @DisplayName("Should return empty list when no household matches address")
     void shouldReturnEmptyListWhenNoHouseholdMatchesAddress() {
-        Person person = new Person("John", "Boyd", "1509 culver St ", "", "", "", "");
+        Person person = new Person("John", "Boyd", "1509 culver St ");
 
         addPersons(person);
 
@@ -78,11 +78,11 @@ class ChildAlertServiceTest {
     @Test
     @DisplayName("Should return empty list when household contains no children")
     void shouldReturnEmptyListWhenHouseholdContainsNoChildren() {
-        Person person = new Person("John", "Boyd", "1509 culver St ", "", "", "", "");
+        Person person = new Person("John", "Boyd", "1509 culver St ");
 
         addPersons(person);
 
-        MedicalRecord record = new MedicalRecord("John", "Boyd", "01/01/1980", List.of(), List.of());
+        MedicalRecord record = new MedicalRecord("John", "Boyd", "01/01/1980");
 
         addMedicalRecords(record);
 
@@ -94,15 +94,15 @@ class ChildAlertServiceTest {
     @Test
     @DisplayName("Should return children with adult household members")
     void shouldReturnChildrenWithAdultHouseholdMembers() {
-        Person adultPerson = new Person("John", "Boyd", "1509 culver St ", "", "", "", "");
+        Person adultPerson = new Person("John", "Boyd", "1509 culver St ");
 
-        Person childPerson = new Person("Juliette", "Boyd", "1509 culver St ", "", "", "", "");
+        Person childPerson = new Person("Juliette", "Boyd", "1509 culver St ");
 
         addPersons(adultPerson, childPerson);
 
-        MedicalRecord adultRecord = new MedicalRecord("John", "Boyd", "01/01/1980", List.of(), List.of());
+        MedicalRecord adultRecord = new MedicalRecord("John", "Boyd", "01/01/1980");
 
-        MedicalRecord childRecord = new MedicalRecord("Juliette", "Boyd", "01/01/2008", List.of(), List.of());
+        MedicalRecord childRecord = new MedicalRecord("Juliette", "Boyd", "01/01/2008");
 
         addMedicalRecords(adultRecord, childRecord);
 
@@ -140,7 +140,7 @@ class ChildAlertServiceTest {
     @DisplayName("Should ignore person when medical record is missing")
     void shouldIgnorePersonWhenMedicalRecordIsMissing() {
 
-        Person childPerson = new Person("Juliette", "Boyd", "1509 culver St ", "", "", "", "");
+        Person childPerson = new Person("Juliette", "Boyd", "1509 culver St ");
 
         addPersons(childPerson);
 
@@ -153,11 +153,11 @@ class ChildAlertServiceTest {
     @DisplayName("Should ignore person when birthdate is null")
     void shouldIgnorePersonWhenBirthdateIsNull() {
 
-        Person childPerson = new Person("Juliette", "Boyd", "1509 culver St ", "", "", "", "");
+        Person childPerson = new Person("Juliette", "Boyd", "1509 culver St ");
 
         addPersons(childPerson);
 
-        MedicalRecord record = new MedicalRecord("Juliette", "Boyd", null, List.of(), List.of());
+        MedicalRecord record = new MedicalRecord("Juliette", "Boyd", null);
 
         addMedicalRecords(record);
 
@@ -170,12 +170,12 @@ class ChildAlertServiceTest {
     @DisplayName("Should ignore person when birthdate is blank")
     void shouldIgnorePersonWhenBirthdateIsBlank() {
 
-        Person childPerson = new Person("Juliette", "Boyd", "1509 culver St ", "", "", "", "");
+        Person childPerson = new Person("Juliette", "Boyd", "1509 culver St ");
 
         addPersons(childPerson);
 
         MedicalRecord record =
-                new MedicalRecord("Juliette", "Boyd", "   ", List.of(), List.of());
+                new MedicalRecord("Juliette", "Boyd", "   ");
 
         addMedicalRecords(record);
 
@@ -189,12 +189,12 @@ class ChildAlertServiceTest {
     @DisplayName("Should ignore person when birthdate is invalid")
     void shouldIgnorePersonWhenBirthdateIsInvalid() {
 
-        Person childPerson = new Person("Juliette", "Boyd", "1509 culver St ", "", "", "", "");
+        Person childPerson = new Person("Juliette", "Boyd", "1509 culver St ");
 
         addPersons(childPerson);
 
         MedicalRecord record =
-                new MedicalRecord("Juliette", "Boyd", "invalid-date", List.of(), List.of());
+                new MedicalRecord("Juliette", "Boyd", "invalid-date");
 
         addMedicalRecords(record);
 

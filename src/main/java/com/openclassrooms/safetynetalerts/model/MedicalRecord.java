@@ -21,6 +21,8 @@ import java.util.List;
 @Setter
 public class MedicalRecord {
 
+    public MedicalRecord() {    }
+
     /**
      * Construit un dossier médical pour une personne donnée.
      *
@@ -40,6 +42,25 @@ public class MedicalRecord {
         this.birthdate = birthdate;
         this.medications = medications;
         this.allergies = allergies;
+    }
+
+    /**
+     * Construit un dossier médical minimal pour une personne donnée.
+     *
+     * <p>Ce constructeur est principalement utilisé dans les tests unitaires
+     * lorsque seules les informations nécessaires au calcul de l'âge sont requises.</p>
+     *
+     * <p>Les listes de médicaments et d'allergies ne sont pas initialisées par ce constructeur
+     * et peuvent être renseignées ultérieurement si nécessaire.</p>
+     *
+     * @param firstName prénom de la personne concernée
+     * @param lastName nom de famille
+     * @param birthdate date de naissance au format attendu par l'application
+     */
+    public MedicalRecord(String firstName, String lastName, String birthdate) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.birthdate = birthdate;
     }
 
     /**
