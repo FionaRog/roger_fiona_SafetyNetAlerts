@@ -41,6 +41,28 @@ public class Person {
     }
 
     /**
+     * Construit une personne avec ses informations minimales.
+     *
+     * <p>Ce constructeur est principalement utilisé dans les tests unitaires
+     * lorsque seules les informations nécessaires à l'identification d'une
+     * personne et à la localisation de son foyer sont requises.</p>
+     *
+     * <p>Les autres informations (ville, code postal, téléphone, e-mail)
+     * peuvent être renseignées ultérieurement si nécessaire.</p>
+     *
+     * @param firstName prénom de la personne
+     * @param lastName nom de famille
+     * @param address adresse du domicile
+     * @param phone téléphone de la personne
+     */
+    public Person(String firstName, String lastName, String address, String phone) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.address = address;
+        this.phone = phone;
+    }
+
+    /**
      * Prénom de la personne.
      */
     private String firstName;

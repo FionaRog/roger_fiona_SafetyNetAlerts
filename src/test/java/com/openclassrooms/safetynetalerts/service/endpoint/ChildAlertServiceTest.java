@@ -1,14 +1,12 @@
-package com.openclassrooms.safetynetalerts.service;
+package com.openclassrooms.safetynetalerts.service.endpoint;
 
 
 import com.openclassrooms.safetynetalerts.dto.AdultDTO;
 import com.openclassrooms.safetynetalerts.dto.ChildAlertDTO;
-import com.openclassrooms.safetynetalerts.dto.SafetyNetDataDTO;
 import com.openclassrooms.safetynetalerts.mapper.PersonMapper;
 import com.openclassrooms.safetynetalerts.model.MedicalRecord;
 import com.openclassrooms.safetynetalerts.model.Person;
 import com.openclassrooms.safetynetalerts.repository.DataLoader;
-import com.openclassrooms.safetynetalerts.service.endpoint.ChildAlertService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
