@@ -1,6 +1,8 @@
 package com.openclassrooms.safetynetalerts.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
@@ -16,9 +18,9 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Person {
-
-    public Person() {}
 
     /**
      * Construit une personne avec ses informations minimales.
@@ -31,8 +33,8 @@ public class Person {
      * peuvent être renseignées ultérieurement si nécessaire.</p>
      *
      * @param firstName prénom de la personne
-     * @param lastName nom de famille
-     * @param address adresse du domicile
+     * @param lastName  nom de famille
+     * @param address   adresse du domicile
      */
     public Person(String firstName, String lastName, String address) {
         this.firstName = firstName;
@@ -51,9 +53,9 @@ public class Person {
      * peuvent être renseignées ultérieurement si nécessaire.</p>
      *
      * @param firstName prénom de la personne
-     * @param lastName nom de famille
-     * @param address adresse du domicile
-     * @param phone téléphone de la personne
+     * @param lastName  nom de famille
+     * @param address   adresse du domicile
+     * @param phone     téléphone de la personne
      */
     public Person(String firstName, String lastName, String address, String phone) {
         this.firstName = firstName;

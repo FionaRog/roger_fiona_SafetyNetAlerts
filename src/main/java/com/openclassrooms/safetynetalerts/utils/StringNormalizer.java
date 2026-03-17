@@ -1,5 +1,7 @@
 package com.openclassrooms.safetynetalerts.utils;
 
+import lombok.NoArgsConstructor;
+
 /**
  * Classe utilitaire centralisant la normalisation des chaînes de caractères
  * pour les comparaisons dans l'application.
@@ -9,13 +11,8 @@ package com.openclassrooms.safetynetalerts.utils;
  *
  * @since 1.0
  */
+@NoArgsConstructor
 public final class StringNormalizer {
-
-    /**
-     * Constructeur privé pour empêcher l'instanciation de la classe utilitaire.
-     */
-    private StringNormalizer() {
-    }
 
     /**
      * Normalise une chaîne pour comparaison.

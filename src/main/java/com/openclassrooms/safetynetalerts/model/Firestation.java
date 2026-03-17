@@ -1,6 +1,8 @@
 package com.openclassrooms.safetynetalerts.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
@@ -20,24 +22,9 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Firestation {
-
-    public Firestation() {}
-
-    /**
-     * Construit une association entre une adresse et une caserne de pompiers.
-     *
-     <p>Ce constructeur facilite l'initialisation d'un {@link Firestation}
-     * lors de tests unitaires ou de créations programmatiques.</p>
-     *
-     *
-     * @param address adresse couverte par la station
-     * @param station numéro de la station de pompiers
-     */
-    public Firestation(String address, String station) {
-        this.address = address;
-        this.station = station;
-    }
 
     /**
      * Adresse couverte par la station.

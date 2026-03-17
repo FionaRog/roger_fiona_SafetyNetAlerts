@@ -63,7 +63,7 @@ public class PersonInfoService implements IPersonInfoService {
     public List<PersonInfoDTO> getPersonsByLastName(String lastName) {
         logger.debug("PersonInfo request: lastName={}", lastName);
 
-        if(lastName == null || lastName.isBlank()) {
+        if (lastName == null || lastName.isBlank()) {
             logger.debug("PersonInfo rejected: lastName is null/blank");
             return List.of();
         }

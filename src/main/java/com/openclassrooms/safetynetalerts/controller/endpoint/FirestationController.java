@@ -57,7 +57,7 @@ public class FirestationController {
                 ? 0
                 : personsByFirestation.getPeople().size();
 
-        logger.info("Firestation success : {} persons returned for station '{}', including {} (children={}, adults={})",
+        logger.info("Firestation success : {} persons returned for station '{}', including : children={}, adults={}",
                 peopleCount, stationNumber, personsByFirestation.getChildren(), personsByFirestation.getAdults());
         return personsByFirestation;
     }

@@ -1,5 +1,7 @@
 package com.openclassrooms.safetynetalerts.utils;
 
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
@@ -20,18 +22,13 @@ import java.time.format.DateTimeParseException;
  *
  * @since 1.0
  */
+@NoArgsConstructor
 public final class AgeUtils {
 
     /**
      * Formateur utilisé pour parser les dates de naissance.
      */
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-
-    /**
-     * Constructeur privé pour empêcher l'instanciation de la classe utilitaire.
-     */
-    private AgeUtils() {
-    }
 
     /**
      * Calcule l'âge à partir d'une date de naissance.

@@ -1,6 +1,8 @@
 package com.openclassrooms.safetynetalerts.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -19,30 +21,9 @@ import java.util.List;
  */
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class MedicalRecord {
-
-    public MedicalRecord() {    }
-
-    /**
-     * Construit un dossier médical pour une personne donnée.
-     *
-     * <p>Ce constructeur facilite l'initialisation d'un {@link MedicalRecord}
-     * lors de tests unitaires ou de créations programmatiques.</p>
-     *
-     * @param firstName prénom de la personne concernée
-     * @param lastName nom de famille
-     * @param birthdate date de naissance au format attendu par l'application
-     * @param medications liste des médicaments
-     * @param allergies liste des allergies
-     */
-    public MedicalRecord(String firstName, String lastName, String birthdate,
-                         List<String> medications, List<String> allergies) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.birthdate = birthdate;
-        this.medications = medications;
-        this.allergies = allergies;
-    }
 
     /**
      * Construit un dossier médical minimal pour une personne donnée.
@@ -54,7 +35,7 @@ public class MedicalRecord {
      * et peuvent être renseignées ultérieurement si nécessaire.</p>
      *
      * @param firstName prénom de la personne concernée
-     * @param lastName nom de famille
+     * @param lastName  nom de famille
      * @param birthdate date de naissance au format attendu par l'application
      */
     public MedicalRecord(String firstName, String lastName, String birthdate) {

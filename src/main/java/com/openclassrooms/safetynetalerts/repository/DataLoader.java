@@ -24,18 +24,18 @@ import java.util.List;
  *
  * <p>Les données sont lues depuis un fichier JSON situé dans le classpath
  * et sont désérialisées en {@link SafetyNetDataDTO} à l'aide de Jackson.</p>
- *
+ * <p>
  * * <p>Après désérialisation, les données sont réparties dans trois collections
- *  * statiques en mémoire :</p>
- *  * <ul>
- *  *     <li>{@link #PERSONS}</li>
- *  *     <li>{@link #MEDICAL_RECORDS}</li>
- *  *     <li>{@link #FIRESTATIONS}</li>
- *  * </ul>
- *
- *  * <p>Cette organisation permet aux services de l'application d'accéder
- *  * directement aux collections nécessaires sans manipuler l'objet
- *  * {@link SafetyNetDataDTO} complet.</p>
+ * * statiques en mémoire :</p>
+ * * <ul>
+ * *     <li>{@link #PERSONS}</li>
+ * *     <li>{@link #MEDICAL_RECORDS}</li>
+ * *     <li>{@link #FIRESTATIONS}</li>
+ * * </ul>
+ * <p>
+ * * <p>Cette organisation permet aux services de l'application d'accéder
+ * * directement aux collections nécessaires sans manipuler l'objet
+ * * {@link SafetyNetDataDTO} complet.</p>
  *
  * <p>Le chargement est effectué au démarrage de l'application
  * via un {@link CommandLineRunner}.</p>
@@ -100,13 +100,13 @@ public class DataLoader {
             logger.info("Datasource resource found: {} (size={} bytes)",
                     resource.getPath(), resource.contentLength());
 
-        try (InputStream is = resource.getInputStream()) {
-            SafetyNetDataDTO dataSource = objectMapper.readValue(is, new TypeReference<SafetyNetDataDTO>() {
-            });
-            MEDICAL_RECORDS = dataSource.getMedicalrecords();
-            PERSONS = dataSource.getPersons();
-            FIRESTATIONS = dataSource.getFirestations();
-        }
+            try (InputStream is = resource.getInputStream()) {
+                SafetyNetDataDTO dataSource = objectMapper.readValue(is, new TypeReference<SafetyNetDataDTO>() {
+                });
+                MEDICAL_RECORDS = dataSource.getMedicalrecords();
+                PERSONS = dataSource.getPersons();
+                FIRESTATIONS = dataSource.getFirestations();
+            }
 
             int personsCount = PERSONS == null ? 0 : PERSONS.size();
             int firestationsCount = FIRESTATIONS == null ? 0 : FIRESTATIONS.size();
