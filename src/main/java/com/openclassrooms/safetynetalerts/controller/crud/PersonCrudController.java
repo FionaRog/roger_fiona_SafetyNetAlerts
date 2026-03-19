@@ -2,6 +2,8 @@ package com.openclassrooms.safetynetalerts.controller.crud;
 
 import com.openclassrooms.safetynetalerts.model.Person;
 import com.openclassrooms.safetynetalerts.service.crud.IPersonCrudService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +30,7 @@ import java.util.List;
 @RestController
 public class PersonCrudController {
 
+    private static final Logger logger = LoggerFactory.getLogger(PersonCrudController.class);
     private final IPersonCrudService personCrudService;
 
     /**
@@ -50,7 +53,7 @@ public class PersonCrudController {
      */
     @GetMapping("/person")
     public List<Person> getPerson() {
-
+        logger.info("Received request GET /person");
         return personCrudService.getPerson();
     }
 
@@ -69,7 +72,7 @@ public class PersonCrudController {
      */
     @PostMapping("/person")
     public ResponseEntity<Void> addPerson(@RequestBody Person person) {
-
+        logger.info("POST /person - request received: {}", person);
         boolean added = personCrudService.addPerson(person);
         return added
                 ? ResponseEntity.status(HttpStatus.CREATED).build()
@@ -91,7 +94,7 @@ public class PersonCrudController {
      */
     @PutMapping("/person")
     public ResponseEntity<Void> updatePerson(@RequestBody Person person) {
-
+        logger.info("PUT /person - request received: {}", person);
         boolean updated = personCrudService.updatePerson(person);
         return updated
                 ? ResponseEntity.noContent().build()
@@ -114,7 +117,7 @@ public class PersonCrudController {
      */
     @DeleteMapping("/person")
     public ResponseEntity<Void> deletePerson(@RequestParam String firstName, @RequestParam String lastName) {
-
+        logger.info("DELETE /person - request received for: {} {}", firstName, lastName);
         boolean deleted = personCrudService.deletePerson(firstName, lastName);
         return deleted
                 ? ResponseEntity.noContent().build()

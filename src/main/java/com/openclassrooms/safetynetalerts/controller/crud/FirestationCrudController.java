@@ -2,6 +2,8 @@ package com.openclassrooms.safetynetalerts.controller.crud;
 
 import com.openclassrooms.safetynetalerts.model.Firestation;
 import com.openclassrooms.safetynetalerts.service.IFirestationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +33,7 @@ import java.util.List;
 @RestController
 public class FirestationCrudController {
 
+    private static final Logger logger = LoggerFactory.getLogger(FirestationCrudController.class);
 
     private final IFirestationService firestationService;
 
@@ -54,7 +57,7 @@ public class FirestationCrudController {
      */
     @GetMapping(value = "/firestation", params = "!stationNumber")
     public List<Firestation> getMapping() {
-
+        logger.info("Received request GET /firestation");
         return firestationService.getFirestation();
     }
 
@@ -74,7 +77,7 @@ public class FirestationCrudController {
      */
     @PostMapping("/firestation")
     public ResponseEntity<Void> addMapping(@RequestBody Firestation firestation) {
-
+        logger.info("POST /firestation - request received: {}", firestation);
         boolean added = firestationService.addFirestation(firestation);
         return added
                 ? ResponseEntity.status(HttpStatus.CREATED).build()
@@ -96,7 +99,7 @@ public class FirestationCrudController {
      */
     @PutMapping("/firestation")
     public ResponseEntity<Void> updateMapping(@RequestBody Firestation firestation) {
-
+        logger.info("PUT /firestation - request received: {}", firestation);
         boolean updated = firestationService.updateFirestationByAddress(firestation);
         return updated
                 ? ResponseEntity.noContent().build()
@@ -118,7 +121,7 @@ public class FirestationCrudController {
      */
     @DeleteMapping(value = "/firestation", params = "address")
     public ResponseEntity<Void> deleteByAddress(@RequestParam String address) {
-
+        logger.info("DELETE /firestation - request received for address: {}", address);
         boolean deleted = firestationService.deleteFirestationByAddress(address);
         return deleted
                 ? ResponseEntity.noContent().build()
@@ -140,7 +143,7 @@ public class FirestationCrudController {
      */
     @DeleteMapping(value = "/firestation", params = "station")
     public ResponseEntity<Void> deleteByStation(@RequestParam String station) {
-
+        logger.info("DELETE /firestation - request received for station: {}", station);
         boolean deleted = firestationService.deleteFirestationByStation(station);
         return deleted
                 ? ResponseEntity.noContent().build()

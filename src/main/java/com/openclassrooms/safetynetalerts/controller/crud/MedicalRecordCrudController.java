@@ -2,6 +2,8 @@ package com.openclassrooms.safetynetalerts.controller.crud;
 
 import com.openclassrooms.safetynetalerts.model.MedicalRecord;
 import com.openclassrooms.safetynetalerts.service.crud.IMedicalRecordCrudService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +30,7 @@ import java.util.List;
 @RestController
 public class MedicalRecordCrudController {
 
+    private static final Logger logger = LoggerFactory.getLogger(MedicalRecordCrudController.class);
     private final IMedicalRecordCrudService medicalRecordCrudService;
 
     /**
@@ -50,7 +53,7 @@ public class MedicalRecordCrudController {
      */
     @GetMapping("/medicalRecord")
     public List<MedicalRecord> getMedicalRecord() {
-
+        logger.info("Received request GET /medicalRecord");
         return medicalRecordCrudService.getMedicalRecord();
     }
 
@@ -69,7 +72,7 @@ public class MedicalRecordCrudController {
      */
     @PostMapping("/medicalRecord")
     public ResponseEntity<Void> addMedicalRecord(@RequestBody MedicalRecord medicalRecord) {
-
+        logger.info("POST /medicalRecord - request received: {}", medicalRecord);
         boolean added = medicalRecordCrudService.addMedicalRecord(medicalRecord);
         return added
                 ? ResponseEntity.status(HttpStatus.CREATED).build()
@@ -92,7 +95,7 @@ public class MedicalRecordCrudController {
      */
     @PutMapping("/medicalRecord")
     public ResponseEntity<Void> updateMedicalRecord(@RequestBody MedicalRecord medicalRecord) {
-
+        logger.info("PUT /medicalRecord - request received: {}", medicalRecord);
         boolean updated = medicalRecordCrudService.updateMedicalRecord(medicalRecord);
         return updated
                 ? ResponseEntity.noContent().build()
@@ -115,7 +118,7 @@ public class MedicalRecordCrudController {
      */
     @DeleteMapping("/medicalRecord")
     public ResponseEntity<Void> deleteMedicalRecord(@RequestParam String firstName, @RequestParam String lastName) {
-
+        logger.info("DELETE /medicalRecord - request received for: {} {}", firstName, lastName);
         boolean deleted = medicalRecordCrudService.deleteMedicalRecord(firstName, lastName);
         return deleted
                 ? ResponseEntity.noContent().build()
