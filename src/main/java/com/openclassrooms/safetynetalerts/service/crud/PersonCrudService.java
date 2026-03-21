@@ -1,5 +1,6 @@
 package com.openclassrooms.safetynetalerts.service.crud;
 
+import com.openclassrooms.safetynetalerts.repository.DataPersistenceService;
 import com.openclassrooms.safetynetalerts.model.Person;
 import com.openclassrooms.safetynetalerts.repository.DataLoader;
 import com.openclassrooms.safetynetalerts.utils.StringNormalizer;
@@ -7,13 +8,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Implémentation du service CRUD permettant de gérer les {@link Person}.
  *
- * <p>Les données sont manipulées en mémoire via {@code DataLoader.DATASOURCE}.</p>
+ * <p>Les données sont manipulées en mémoire via {@code DataLoader.PERSONS}.</p>
  *
  * <p>Règles principales :</p>
  * <ul>
@@ -29,6 +31,20 @@ import java.util.List;
 public class PersonCrudService implements IPersonCrudService {
 
     private static final Logger logger = LoggerFactory.getLogger(PersonCrudService.class);
+
+    private final DataPersistenceService dataPersistenceService;
+
+    /**
+     * Construit le service PersonCrud.
+     *
+     * @param dataPersistenceService service responsable de la persistance des données
+     * dans le fichier JSON externe
+     *
+     * @since 1.0
+     */
+    public PersonCrudService(DataPersistenceService dataPersistenceService) {
+        this.dataPersistenceService = dataPersistenceService;
+    }
 
     /**
      * Retourne l'ensemble des personnes.
@@ -68,7 +84,7 @@ public class PersonCrudService implements IPersonCrudService {
         }
 
         DataLoader.PERSONS.add(newPerson);
-
+        dataPersistenceService.saveData();
         logger.debug("new person {} {} added ", newPerson.getFirstName(), newPerson.getLastName());
         return true;
     }
@@ -105,7 +121,7 @@ public class PersonCrudService implements IPersonCrudService {
                 person.setZip(updatedPerson.getZip());
                 person.setPhone(updatedPerson.getPhone());
                 person.setEmail(updatedPerson.getEmail());
-
+                dataPersistenceService.saveData();
                 logger.debug("person {} {} updated",
                         person.getFirstName(), person.getLastName());
                 return true;
@@ -148,6 +164,7 @@ public class PersonCrudService implements IPersonCrudService {
         boolean deleted = after < before;
 
         if (deleted) {
+            dataPersistenceService.saveData();
             logger.debug("person {} {} deleted", firstName, lastName);
         } else {
             logger.debug("Delete person {} {} rejected", firstName, lastName);

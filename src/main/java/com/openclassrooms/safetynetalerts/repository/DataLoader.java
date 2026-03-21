@@ -15,27 +15,33 @@ import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Composant Spring responsable du chargement des données
- * initiales de l'application SafetyNetAlerts.
+ * Composant Spring responsable du chargement et de l'initialisation des données
+ * de l'application SafetyNetAlerts.
  *
- * <p>Les données sont lues depuis un fichier JSON situé dans le classpath
- * et sont désérialisées en {@link SafetyNetDataDTO} à l'aide de Jackson.</p>
- * <p>
- * * <p>Après désérialisation, les données sont réparties dans trois collections
- * * statiques en mémoire :</p>
- * * <ul>
- * *     <li>{@link #PERSONS}</li>
- * *     <li>{@link #MEDICAL_RECORDS}</li>
- * *     <li>{@link #FIRESTATIONS}</li>
- * * </ul>
- * <p>
- * * <p>Cette organisation permet aux services de l'application d'accéder
- * * directement aux collections nécessaires sans manipuler l'objet
- * * {@link SafetyNetDataDTO} complet.</p>
+ * <p>Les données sont lues depuis un fichier JSON externe défini par {@code data.path}.
+ * Si ce fichier n'existe pas, il est initialisé à partir d'un fichier seed
+ * présent dans le classpath ({@code data.classpath-seed}).</p>
+ *
+ * <p>Les données sont ensuite désérialisées en {@link SafetyNetDataDTO}
+ * à l'aide de Jackson.</p>
+ *
+ * <p>Les données sont stockées et réparties dans trois collections statiques
+ * en mémoire :</p>
+ * <ul>
+ *      <li>{@link #PERSONS}</li>
+ *      <li>{@link #MEDICAL_RECORDS}</li>
+ *      <li>{@link #FIRESTATIONS}</li>
+ * </ul>
+ *
+ *  <p>Cette organisation permet de séparer les données initiales des données persistantes,
+ * de permettre la modification et la persistance des données à l'exécution,
+ * d'éviter les limitations du classpath.</p>
  *
  * <p>Le chargement est effectué au démarrage de l'application
  * via un {@link CommandLineRunner}.</p>
@@ -49,22 +55,32 @@ public class DataLoader {
 
 
     /**
-     * Source de donnée en mémoire utilisé par l'application.
+     * Données en mémoire utilisées par l'application.
      */
 
-    public static List<Person> PERSONS = new ArrayList();
-    public static List<MedicalRecord> MEDICAL_RECORDS = new ArrayList();
-    public static List<Firestation> FIRESTATIONS = new ArrayList();
+    public static List<Person> PERSONS = new ArrayList<>();
+    public static List<MedicalRecord> MEDICAL_RECORDS = new ArrayList<>();
+    public static List<Firestation> FIRESTATIONS = new ArrayList<>();
 
 
     /**
-     * Chemin vers le fichier JSON contenant les données initiales.
+     * Nom du fichier JSON initial présent dans le classpath.
      *
-     * <p>La valeur est injectée depuis la configuration Spring
-     * via la propriété {@code data-path}.</p>
+     * <p>Utilisé uniquement pour initialiser le fichier de données externe
+     * lors du premier lancement de l'application.</p>
      */
-    @Value("${data-path}")
-    private String datasourceFilePath;
+    @Value("${data.classpath-seed}")
+    private String classpathSeed;
+
+    /**
+     * Chemin vers le fichier de données persistant utilisé par l'application.
+     *
+     * <p>Ce fichier est lu au démarrage pour charger les données en mémoire.
+     * S'il n'existe pas, il est automatiquement créé à partir du fichier seed
+     * présent dans le classpath.</p>
+     */
+    @Value("${data.path}")
+    private String dataFilePath;
 
     /**
      * Déclenche le chargement des données au démarrage de l'application.
@@ -77,47 +93,67 @@ public class DataLoader {
     }
 
     /**
-     * Charge les données depuis le fichier JSON et les désérialise
-     * dans {@link SafetyNetDataDTO}.
+     * Charge les données applicatives depuis le fichier JSON externe.
      *
-     * <p>Les données sont ensuite stockées dans {@link #PERSONS}, {@link #MEDICAL_RECORDS} et {@link #FIRESTATIONS}
-     * afin d'être utilisées par les services de l'application.</p>
+     * <p>Étapes :</p>
+     * <ul>
+     *   <li>vérifie l'existence du fichier externe défini par {@code data.path},</li>
+     *   <li>si absent, copie le fichier seed depuis le classpath,</li>
+     *   <li>lit le fichier JSON externe,</li>
+     *   <li>désérialise les données en objets métier,</li>
+     *   <li>alimente les listes statiques {@code PERSONS}, {@code MEDICAL_RECORDS} et {@code FIRESTATIONS}.</li>
+     * </ul>
      *
-     * @throws RuntimeException si le fichier ne peut pas être lu
-     *                          ou si la désérialisation échoue
+     * <p>En cas d'échec, une exception est levée et l'application ne peut pas démarrer correctement.</p>
+     *
+     * @throws RuntimeException si le chargement des données échoue
      */
     public void loadData() {
 
-        logger.info("Loading datasource from classpath: {}", datasourceFilePath);
+        logger.info("Loading data from persistent file path: {}", dataFilePath);
 
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            ClassPathResource resource = new ClassPathResource(datasourceFilePath);
-            if (!resource.exists()) {
-                throw new RuntimeException("Datasource file not found in classpath: " + datasourceFilePath);
+            Path targetPath = Path.of(dataFilePath);
+            if (targetPath.getParent() !=null) {
+                Files.createDirectories(targetPath.getParent());
             }
-            logger.info("Datasource resource found: {} (size={} bytes)",
-                    resource.getPath(), resource.contentLength());
 
-            try (InputStream is = resource.getInputStream()) {
-                SafetyNetDataDTO dataSource = objectMapper.readValue(is, new TypeReference<SafetyNetDataDTO>() {
-                });
-                MEDICAL_RECORDS = dataSource.getMedicalrecords();
-                PERSONS = dataSource.getPersons();
-                FIRESTATIONS = dataSource.getFirestations();
+            if(Files.notExists(targetPath)) {
+                logger.info("Persistent data file not found, initializing from seed file : {}",
+                        classpathSeed);
+
+                ClassPathResource resource = new ClassPathResource(classpathSeed);
+                if(!resource.exists()) {
+                    throw new RuntimeException("Seed file not found in classpath: " + classpathSeed);
+                }
+
+                try (InputStream is = resource.getInputStream()) {
+                    Files.copy(is, targetPath);
+                }
+
+                logger.info("Persistent data file created at: {}", targetPath.toAbsolutePath());
+            }
+
+
+            try (InputStream is = Files.newInputStream(targetPath)) {
+                SafetyNetDataDTO loadedData = objectMapper.readValue(is, new TypeReference<SafetyNetDataDTO>() {});
+                MEDICAL_RECORDS = loadedData.getMedicalrecords();
+                PERSONS = loadedData.getPersons();
+                FIRESTATIONS = loadedData.getFirestations();
             }
 
             int personsCount = PERSONS == null ? 0 : PERSONS.size();
             int firestationsCount = FIRESTATIONS == null ? 0 : FIRESTATIONS.size();
             int medicalCount = MEDICAL_RECORDS == null ? 0 : MEDICAL_RECORDS.size();
 
-            logger.info("Datasource loaded: persons={}, firestations={}, medicalrecords={}",
-                    personsCount, firestationsCount, medicalCount);
+            logger.info("Data loaded from persistent file: {} persons={}, firestations={}, medicalrecords={}",
+                    targetPath.toAbsolutePath(), personsCount, firestationsCount, medicalCount);
 
         } catch (Exception e) {
-            logger.error("Failed to load datasource from path '{}'", datasourceFilePath, e);
-            throw new RuntimeException("Failed to load datasource from path '" + datasourceFilePath + "'", e);
+            logger.error("Failed to load data from persistent file: {}", dataFilePath, e);
+            throw new RuntimeException("Failed to load data from persistent file: " + dataFilePath, e);
         }
     }
 }

@@ -1,11 +1,14 @@
-2026-03-20T14:30:02.364+01:00  INFO 32672 --- [SafetyNetAlerts] [main] c.o.s.SafetyNetAlertsApplication         : Starting SafetyNetAlertsApplication using Java 17.0.17 with PID 32672 (C:\Users\fiona\Documents\Dev\01_FORMATION_OC\roger_fiona_SafetyNetAlerts\target\classes started by fiona in C:\Users\fiona\Documents\Dev\01_FORMATION_OC\roger_fiona_SafetyNetAlerts)
-2026-03-20T14:30:02.369+01:00  INFO 32672 --- [SafetyNetAlerts] [main] c.o.s.SafetyNetAlertsApplication         : No active profile set, falling back to 1 default profile: "default"
-2026-03-20T14:30:03.497+01:00  INFO 32672 --- [SafetyNetAlerts] [main] c.o.s.SafetyNetAlertsApplication         : Started SafetyNetAlertsApplication in 1.649 seconds (process running for 2.099)
-2026-03-20T14:30:03.506+01:00  INFO 32672 --- [SafetyNetAlerts] [main] c.o.s.repository.DataLoader              : Loading datasource from classpath: datas.json
-2026-03-20T14:30:03.507+01:00  INFO 32672 --- [SafetyNetAlerts] [main] c.o.s.repository.DataLoader              : Datasource resource found: datas.json (size=10661 bytes)
-2026-03-20T14:30:03.576+01:00  INFO 32672 --- [SafetyNetAlerts] [main] c.o.s.repository.DataLoader              : Datasource loaded: persons=23, firestations=13, medicalrecords=23
-2026-03-20T14:30:30.593+01:00  INFO 32672 --- [SafetyNetAlerts] [http-nio-8080-exec-6] c.o.s.c.crud.PersonCrudController        : PUT /person - request received: com.openclassrooms.safetynetalerts.model.Person@724b8e9d
-2026-03-20T14:30:47.222+01:00  INFO 32672 --- [SafetyNetAlerts] [http-nio-8080-exec-7] c.o.s.c.endpoint.FloodController         : Received request GET /flood/stations?stations=[1, 2, 3]
-2026-03-20T14:30:47.227+01:00  INFO 32672 --- [SafetyNetAlerts] [http-nio-8080-exec-7] c.o.s.c.endpoint.FloodController         : Flood success: response built with 10 household(s)
-2026-03-20T14:31:57.848+01:00  INFO 32672 --- [SafetyNetAlerts] [http-nio-8080-exec-5] c.o.s.c.endpoint.FirestationController   : Received request GET /firestation?stationNumber=3
-2026-03-20T14:31:57.849+01:00  INFO 32672 --- [SafetyNetAlerts] [http-nio-8080-exec-5] c.o.s.c.endpoint.FirestationController   : Firestation success : 10 persons returned for station '3', including : children=3, adults=7
+2026-03-21T15:13:32.465+01:00  INFO 31952 --- [SafetyNetAlerts] [main] c.o.s.SafetyNetAlertsApplication         : Starting SafetyNetAlertsApplication using Java 17.0.17 with PID 31952 (C:\Users\fiona\Documents\Dev\01_FORMATION_OC\roger_fiona_SafetyNetAlerts\target\classes started by fiona in C:\Users\fiona\Documents\Dev\01_FORMATION_OC\roger_fiona_SafetyNetAlerts)
+2026-03-21T15:13:32.471+01:00  INFO 31952 --- [SafetyNetAlerts] [main] c.o.s.SafetyNetAlertsApplication         : No active profile set, falling back to 1 default profile: "default"
+2026-03-21T15:13:33.260+01:00  INFO 31952 --- [SafetyNetAlerts] [main] c.o.s.SafetyNetAlertsApplication         : Started SafetyNetAlertsApplication in 1.114 seconds (process running for 1.377)
+2026-03-21T15:13:33.264+01:00  INFO 31952 --- [SafetyNetAlerts] [main] c.o.s.repository.DataLoader              : Loading data from persistent file path: ./data/datas.json
+2026-03-21T15:13:33.314+01:00  INFO 31952 --- [SafetyNetAlerts] [main] c.o.s.repository.DataLoader              : Data loaded from persistent file: C:\Users\fiona\Documents\Dev\01_FORMATION_OC\roger_fiona_SafetyNetAlerts\.\data\datas.json persons=24, firestations=13, medicalrecords=24
+2026-03-21T15:14:07.360+01:00  INFO 31952 --- [SafetyNetAlerts] [http-nio-8080-exec-2] c.o.s.c.crud.PersonCrudController        : Received request GET /person
+2026-03-21T15:14:20.546+01:00  INFO 31952 --- [SafetyNetAlerts] [http-nio-8080-exec-9] c.o.s.c.endpoint.FirestationController   : Received request GET /firestation?stationNumber=3
+2026-03-21T15:14:20.549+01:00  INFO 31952 --- [SafetyNetAlerts] [http-nio-8080-exec-9] c.o.s.c.endpoint.FirestationController   : Firestation success : 11 persons returned for station '3', including : children=3, adults=8
+2026-03-21T15:15:07.594+01:00  INFO 31952 --- [SafetyNetAlerts] [http-nio-8080-exec-6] c.o.s.c.endpoint.FloodController         : Received request GET /flood/stations?stations=[1, 2]
+2026-03-21T15:15:07.596+01:00  INFO 31952 --- [SafetyNetAlerts] [http-nio-8080-exec-6] c.o.s.c.endpoint.FloodController         : Flood success: response built with 6 household(s)
+2026-03-21T15:15:15.333+01:00  INFO 31952 --- [SafetyNetAlerts] [http-nio-8080-exec-4] c.o.s.c.e.CommunityEmailController       : Received request GET /communityEmail?city=Culver
+2026-03-21T15:15:15.333+01:00  INFO 31952 --- [SafetyNetAlerts] [http-nio-8080-exec-4] c.o.s.c.e.CommunityEmailController       : communityEmail success: 16 emails returned for city 'Culver'
+2026-03-21T15:15:22.046+01:00  INFO 31952 --- [SafetyNetAlerts] [http-nio-8080-exec-8] c.o.s.c.endpoint.ChildAlertController    : Received request GET /childAlert?address= 1509 culver St
+2026-03-21T15:15:22.049+01:00  INFO 31952 --- [SafetyNetAlerts] [http-nio-8080-exec-8] c.o.s.c.endpoint.ChildAlertController    : ChildAlert success : 2 children returned for address ' 1509 culver St'

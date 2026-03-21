@@ -8,6 +8,7 @@ import com.openclassrooms.safetynetalerts.model.MedicalRecord;
 import com.openclassrooms.safetynetalerts.model.Person;
 import com.openclassrooms.safetynetalerts.repository.DataLoader;
 
+import com.openclassrooms.safetynetalerts.repository.DataPersistenceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,14 +20,16 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class FirestationServiceTest {
 
     @Mock
     private FirestationMapper firestationMapper;
+
+    @Mock
+    private DataPersistenceService dataPersistenceService;
 
     private FirestationService firestationService;
 
@@ -35,7 +38,7 @@ public class FirestationServiceTest {
         DataLoader.PERSONS.clear();
         DataLoader.MEDICAL_RECORDS.clear();
         DataLoader.FIRESTATIONS.clear();
-        firestationService = new FirestationService(firestationMapper);
+        firestationService = new FirestationService(firestationMapper, dataPersistenceService);
     }
 
     private void addFirestations(Firestation... firestations) {
@@ -52,6 +55,8 @@ public class FirestationServiceTest {
 
         assertTrue(result);
         assertEquals(1, DataLoader.FIRESTATIONS.size());
+
+        verify(dataPersistenceService).saveData();
     }
 
     @Test
@@ -66,6 +71,8 @@ public class FirestationServiceTest {
 
         assertFalse(result);
         assertEquals(1, DataLoader.FIRESTATIONS.size());
+
+        verify(dataPersistenceService, never()).saveData();
     }
 
     @Test
@@ -80,6 +87,8 @@ public class FirestationServiceTest {
 
         assertTrue(result);
         assertEquals("4", DataLoader.FIRESTATIONS.get(0).getStation());
+
+        verify(dataPersistenceService).saveData();
     }
 
     @Test
@@ -92,6 +101,8 @@ public class FirestationServiceTest {
 
         assertTrue(result);
         assertTrue(DataLoader.FIRESTATIONS.isEmpty());
+
+        verify(dataPersistenceService).saveData();
     }
 
     @Test
@@ -107,6 +118,8 @@ public class FirestationServiceTest {
 
         assertTrue(result);
         assertTrue(DataLoader.FIRESTATIONS.isEmpty());
+
+        verify(dataPersistenceService).saveData();
     }
 
     @Test

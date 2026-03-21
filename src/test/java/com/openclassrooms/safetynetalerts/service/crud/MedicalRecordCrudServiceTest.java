@@ -2,24 +2,29 @@ package com.openclassrooms.safetynetalerts.service.crud;
 
 import com.openclassrooms.safetynetalerts.model.MedicalRecord;
 import com.openclassrooms.safetynetalerts.repository.DataLoader;
-import com.openclassrooms.safetynetalerts.service.crud.MedicalRecordCrudService;
+import com.openclassrooms.safetynetalerts.repository.DataPersistenceService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 public class MedicalRecordCrudServiceTest {
 
     private MedicalRecordCrudService medicalRecordCrudService;
+    private DataPersistenceService dataPersistenceService;
 
     @BeforeEach
     void setUp() {
         DataLoader.MEDICAL_RECORDS.clear();
-        medicalRecordCrudService = new MedicalRecordCrudService();
+        dataPersistenceService = Mockito.mock(DataPersistenceService.class);
+        medicalRecordCrudService = new MedicalRecordCrudService(dataPersistenceService);
     }
 
     private void addMedicalRecords(MedicalRecord... records) {
@@ -37,6 +42,8 @@ public class MedicalRecordCrudServiceTest {
 
         assertTrue(result);
         assertEquals(1, DataLoader.MEDICAL_RECORDS.size());
+
+        verify(dataPersistenceService).saveData();
     }
 
     @Test
@@ -54,6 +61,8 @@ public class MedicalRecordCrudServiceTest {
 
         assertFalse(result);
         assertEquals(1, DataLoader.MEDICAL_RECORDS.size());
+
+        verify(dataPersistenceService, never()).saveData();
     }
 
     @Test
@@ -72,6 +81,8 @@ public class MedicalRecordCrudServiceTest {
         assertTrue(result);
         assertEquals("01/01/1981",
                 DataLoader.MEDICAL_RECORDS.get(0).getBirthdate());
+
+        verify(dataPersistenceService).saveData();
     }
 
     @Test
@@ -87,5 +98,7 @@ public class MedicalRecordCrudServiceTest {
 
         assertTrue(result);
         assertTrue(DataLoader.MEDICAL_RECORDS.isEmpty());
+
+        verify(dataPersistenceService).saveData();
     }
 }

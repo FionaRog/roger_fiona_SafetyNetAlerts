@@ -1,8 +1,9 @@
 package com.openclassrooms.safetynetalerts.service.crud;
 
+import com.openclassrooms.safetynetalerts.repository.DataPersistenceService;
+import org.mockito.Mockito;
 import com.openclassrooms.safetynetalerts.model.Person;
 import com.openclassrooms.safetynetalerts.repository.DataLoader;
-import com.openclassrooms.safetynetalerts.service.crud.PersonCrudService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -10,17 +11,20 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PersonCrudServiceTest {
 
     private PersonCrudService personCrudService;
+    private DataPersistenceService dataPersistenceService;
 
     @BeforeEach
     void setUp() {
         DataLoader.PERSONS.clear();
-        personCrudService = new PersonCrudService();
-    }
+        dataPersistenceService = Mockito.mock(DataPersistenceService.class);
+        personCrudService = new PersonCrudService(dataPersistenceService);    }
 
     private void addPersons(Person... persons) {
         DataLoader.PERSONS.addAll(List.of(persons));
@@ -37,6 +41,8 @@ public class PersonCrudServiceTest {
         assertTrue(result);
         assertEquals(1, DataLoader.PERSONS.size());
         assertEquals("John", DataLoader.PERSONS.get(0).getFirstName());
+
+        verify(dataPersistenceService).saveData();
     }
 
     @Test
@@ -51,6 +57,8 @@ public class PersonCrudServiceTest {
 
         assertFalse(result);
         assertEquals(1, DataLoader.PERSONS.size());
+
+        verify(dataPersistenceService, never()).saveData();
     }
 
     @Test
@@ -66,6 +74,8 @@ public class PersonCrudServiceTest {
 
         assertTrue(result);
         assertEquals("29 15th St", DataLoader.PERSONS.get(0).getAddress());
+
+        verify(dataPersistenceService).saveData();
     }
 
     @Test
@@ -79,5 +89,7 @@ public class PersonCrudServiceTest {
 
         assertTrue(result);
         assertTrue(DataLoader.PERSONS.isEmpty());
+
+        verify(dataPersistenceService).saveData();
     }
 }

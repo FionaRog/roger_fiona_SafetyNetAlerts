@@ -7,6 +7,7 @@ import com.openclassrooms.safetynetalerts.model.Firestation;
 import com.openclassrooms.safetynetalerts.model.MedicalRecord;
 import com.openclassrooms.safetynetalerts.model.Person;
 import com.openclassrooms.safetynetalerts.repository.DataLoader;
+import com.openclassrooms.safetynetalerts.repository.DataPersistenceService;
 import com.openclassrooms.safetynetalerts.utils.AgeUtils;
 import com.openclassrooms.safetynetalerts.utils.StringNormalizer;
 import org.slf4j.Logger;
@@ -39,16 +40,21 @@ public class FirestationService implements IFirestationService {
 
     private static final Logger logger = LoggerFactory.getLogger(FirestationService.class);
 
+    private final DataPersistenceService dataPersistenceService;
     private final FirestationMapper firestationMapper;
 
     /**
      * Construit le service Firestation.
      *
      * @param firestationMapper mapper MapStruct utilisé pour construire les DTO
+     * @param dataPersistenceService service responsable de la persistance des données
+     * dans le fichier JSON externe
+     *
      * @since 1.0
      */
-    public FirestationService(FirestationMapper firestationMapper) {
-        this.firestationMapper = firestationMapper;
+    public FirestationService(FirestationMapper firestationMapper, DataPersistenceService dataPersistenceService) {
+                this.firestationMapper = firestationMapper;
+                this.dataPersistenceService = dataPersistenceService;
     }
 
 // --------------- CRUD ----------------------
@@ -83,7 +89,7 @@ public class FirestationService implements IFirestationService {
             }
         }
         DataLoader.FIRESTATIONS.add(newfirestation);
-
+        dataPersistenceService.saveData();
         logger.debug("firestation added with address {} and station {}",
                 newfirestation.getAddress(), newfirestation.getStation());
         return true;
@@ -106,6 +112,7 @@ public class FirestationService implements IFirestationService {
             if (StringNormalizer.same(firestation.getAddress(), updatedFirestation.getAddress())) {
 
                 firestation.setStation(updatedFirestation.getStation());
+                dataPersistenceService.saveData();
 
                 logger.debug("firestation updated for address {} with updated station {}",
                         updatedFirestation.getAddress(), updatedFirestation.getStation());
@@ -141,6 +148,7 @@ public class FirestationService implements IFirestationService {
         boolean deleted = after < before;
 
         if (deleted) {
+            dataPersistenceService.saveData();
             logger.debug("Firestation for address '{}' deleted", deletedAddress);
         } else {
             logger.debug("Delete firestation rejected: no mapping found for address '{}'", deletedAddress);
@@ -174,6 +182,7 @@ public class FirestationService implements IFirestationService {
         boolean deleted = after < before;
 
         if (deleted) {
+            dataPersistenceService.saveData();
             logger.debug("Firestation for station '{}' deleted", deletedStation);
         } else {
             logger.debug("Delete firestation rejected: no mapping found for station '{}'", deletedStation);

@@ -2,6 +2,7 @@ package com.openclassrooms.safetynetalerts.service.crud;
 
 import com.openclassrooms.safetynetalerts.model.MedicalRecord;
 import com.openclassrooms.safetynetalerts.repository.DataLoader;
+import com.openclassrooms.safetynetalerts.repository.DataPersistenceService;
 import com.openclassrooms.safetynetalerts.utils.StringNormalizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +14,7 @@ import java.util.List;
 /**
  * Implémentation du service CRUD permettant de gérer les {@link MedicalRecord}.
  *
- * <p>Les données sont manipulées en mémoire via {@code DataLoader.DATASOURCE}.</p>
+ * <p>Les données sont manipulées en mémoire via {@code DataLoader.MEDICAL_RECORDS}.</p>
  *
  * <p>Règles principales :</p>
  * <ul>
@@ -29,6 +30,19 @@ import java.util.List;
 public class MedicalRecordCrudService implements IMedicalRecordCrudService {
 
     private static final Logger logger = LoggerFactory.getLogger(MedicalRecordCrudService.class);
+    private final DataPersistenceService dataPersistenceService;
+
+    /**
+     * Construit le service MedicalRecordCrud.
+     *
+     * @param dataPersistenceService service responsable de la persistance des données
+     * dans le fichier JSON externe
+     *
+     * @since 1.0
+     */
+    public MedicalRecordCrudService(DataPersistenceService dataPersistenceService) {
+        this.dataPersistenceService = dataPersistenceService;
+    }
 
     /**
      * Retourne l'ensemble des dossiers médicaux.
@@ -37,7 +51,6 @@ public class MedicalRecordCrudService implements IMedicalRecordCrudService {
      * @since 1.0
      */
     public List<MedicalRecord> getMedicalRecord() {
-
         return new ArrayList<>(DataLoader.MEDICAL_RECORDS);
     }
 
@@ -72,7 +85,7 @@ public class MedicalRecordCrudService implements IMedicalRecordCrudService {
             }
         }
         DataLoader.MEDICAL_RECORDS.add(newMedicalRecord);
-
+        dataPersistenceService.saveData();
         logger.debug("medicalRecord added for {} {}",
                 newMedicalRecord.getFirstName(), newMedicalRecord.getLastName());
 
@@ -110,7 +123,7 @@ public class MedicalRecordCrudService implements IMedicalRecordCrudService {
                 medicalRecord.setMedications(updatedMedicalRecord.getMedications());
                 medicalRecord.setAllergies(updatedMedicalRecord.getAllergies());
                 medicalRecord.setBirthdate(updatedMedicalRecord.getBirthdate());
-
+                dataPersistenceService.saveData();
                 logger.debug("medicalRecord updated for {} {}",
                         medicalRecord.getFirstName(), medicalRecord.getLastName());
 
@@ -152,7 +165,15 @@ public class MedicalRecordCrudService implements IMedicalRecordCrudService {
 
         int after = DataLoader.MEDICAL_RECORDS.size();
 
-        logger.debug("medicalRecord deleted for {} {}", firstName, lastName);
-        return after < before;
+        boolean deleted = after < before;
+
+        if (deleted) {
+            dataPersistenceService.saveData();
+            logger.debug("medicalRecord deleted for {} {}", firstName, lastName);
+        } else {
+            logger.debug("Delete medicalRecord rejected for {} {}", firstName, lastName);
+        }
+
+        return deleted;
     }
 }
